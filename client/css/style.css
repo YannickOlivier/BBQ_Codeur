@@ -32,6 +32,12 @@ body {
   border-top: .05rem solid #e5e5e5;
 }
 
+.well {
+  background-image: none;
+  background-color: #CCD1D9;
+  border-color: #656D78;
+}
+
 .well h3 {
   margin-top: 1rem;
   margin-bottom: 1rem;
