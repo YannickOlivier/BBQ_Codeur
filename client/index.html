@@ -6,8 +6,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" >
 </head>
 <body>
   <div class="container">
@@ -79,6 +79,27 @@
           </div>
           </div>
           <div class="col-sm-9 col-md-9">
+            <div class="example">
+				<div class="toggle btn btn-primary" data-toggle="toggle" style="width: 57px; height: 34px;"><input id="toggle-trigger" type="checkbox" data-toggle="toggle"><div class="toggle-group"><label class="btn btn-primary toggle-on">On</label><label class="btn btn-default active toggle-off">Off</label><span class="toggle-handle btn btn-default"></span></div></div>
+				<button class="btn btn-success" onclick="toggleOn()">On by API</button>
+				<button class="btn btn-danger" onclick="toggleOff()">Off by API</button>
+				<button class="btn btn-success" onclick="toggleOnByInput()">On by Input</button>
+				<button class="btn btn-danger" onclick="toggleOffByInput()">Off by Input</button>
+				<script>
+					function toggleOn() {
+						$('#toggle-trigger').bootstrapToggle('on')
+					}
+					function toggleOff() {
+						$('#toggle-trigger').bootstrapToggle('off')
+					}
+					function toggleOnByInput() {
+						$('#toggle-trigger').prop('checked', true).change()
+					}
+					function toggleOffByInput() {
+						$('#toggle-trigger').prop('checked', false).change()
+					}
+				</script>
+			</div>
               <div class="well well-sm">
                   <h3> Lorem Ipsum </h3>
                   <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eget mauris neque. Donec interdum volutpat pretium. Aenean fermentum erat diam, a laoreet odio egestas nec. Nulla consequat tincidunt augue. Aenean id bibendum neque. Sed auctor neque nec tellus convallis mollis. Suspendisse potenti. Maecenas vel ligula risus. Quisque nulla eros, faucibus sit amet sollicitudin tempus, porta ut erat. Nulla neque neque, finibus a nisi ut, sagittis ornare enim. Cras sagittis leo vel nunc interdum, eu luctus mi luctus.<p>
@@ -95,5 +116,6 @@
   </div>
     <script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
   </body>
 </html>
