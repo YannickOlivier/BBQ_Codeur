@@ -30,9 +30,28 @@ body {
   color: #777;
   text-align: center;
   border-top: .05rem solid #e5e5e5;
+  margin-top: 2rem;
 }
 
-.well h3 {
+.corpsTop {
+  position: relative;
+  border: 1px solid #ccc;
+  padding: 1em 1em 0.5em 1em;
+  border-radius: 4px 4px 0 0;
+}
+
+.corpsBottom {
+  border-top: 0;
+  border-radius: 0px 0px 4px 4px;
+  border: 1px solid #ccc;
+  padding: 1em;
+  margin-bottom: 10px
+  overflow-x: auto;
+  color: #333;
+  background: #f8f8f8;
+}
+
+.corpsBottom h3 {
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
