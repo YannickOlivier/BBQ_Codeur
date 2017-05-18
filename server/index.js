@@ -52,20 +52,12 @@ io.sockets.on('connection', function (socket) {
   });
 
   socket.on('updateProfile', function(request){
+    console.log(JSON.stringify(request))
     console.log('Update Profile');
-    fs.readFile(path.join(__dirname, '../common/bbq.profile'), (err, data) => {
-      if(err){}
-        //Error handle
-      else{
-        let temp = data;
-        for(var i in request)
-          temp[i] = request[i];
-        fs.writeFile(path.join(__dirname, '../common/bbq.profile'), temp, (err) => {
-          if(err){}
-          //Error handle
-        });
-      }
-    });
+    try { var temp = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/bbq.profile'), 'utf8')); } catch(e) { var temp = {}; console.log('error: '+e.message);}
+    temp[request.name] = request;
+    temp = JSON.stringify(temp);
+    fs.writeFileSync(path.join(__dirname, '../common/bbq.profile'), temp);
   });
 
 

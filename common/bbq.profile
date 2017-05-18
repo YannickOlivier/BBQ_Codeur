@@ -1,6 +1,1 @@
-{
-    "test": {
-        "vCodec": "blabladd",
-        "aCodec": "fsdfsds"
-    }
-}
+{"Profil 2":{"name":"Profil 2","Format":"3840*2160","vCodec":"x265","aCodec":"AAC"},"Profil 1":{"name":"Profil 1","Format":"3840*2160","vCodec":"x265","aCodec":"AAC"}}
