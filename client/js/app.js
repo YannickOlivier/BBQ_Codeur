@@ -10,6 +10,15 @@ jQuery(function ($) {
 
     $('#NewProfil').click(function(el){
         console.log('click');
+        $('#NameProfil').val('');
     });
 
+    $('#SaveProfile').click(function() {
+        socket.emit('updateProfile', {
+          name:$('#NameProfil').val(),
+          Format:$('#Format').val(),
+          vCodec:$('#vCodec').val(),
+          aCodec:$('#aCodec').val(),
+        });
+    });
 });
