@@ -11,10 +11,9 @@ let fs = require('fs');
 
 app.use('/public', express.static(path.join(__dirname, '../client')));
 
-app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, '../client/index.html'));
-});
-
+app.get('/', function (req, res) { res.sendFile(path.join(__dirname, '../client/index.html')); });
+app.get('/index.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/index.html')); });
+app.get('/profiles.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/profiles.html')); });
 
 io.sockets.on('connection', function (socket) {
   socket.on('job', function(job){
@@ -80,4 +79,5 @@ try{
 catch(e){
   BBQEvent.emit('error',e);
 }
+
 
