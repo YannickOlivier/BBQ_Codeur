@@ -1,20 +1,15 @@
-var socket = io('http://localhost:8080');
+jQuery(function ($) {
 
-socket.on('getProfile', function(request) {
-    if(request.type == 'all')
+    var socket = io('http://localhost:8080');
+
+    //On change le nom du profile dans la liste
+    console.log('salut');
+    $('#listProfil').change(function(){
+        $('#NameProfil').val(this.value);
+    });
+
+    $('#NewProfil').click(function(el){
+        console.log('click');
+    });
 
 });
-
-
-socket.on('tamere', tpt);
-
-function tpt(sdvsdgdg){
-  do somtj
-}
-
-socket.on('NewProfil')
-
-socket.on('SaveProfil', function(data) {
-    data.emit(NameProfil + Format + vCodec + aCodec + FrameRate)
-
-}
