@@ -1,0 +1,57 @@
+body {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.glyphicon { margin-right:10px; }
+.panel-body { padding:0px; }
+.panel-body table tr td { padding-left: 15px }
+.panel-body .table {margin-bottom: 0px; }
+.center-block {
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.header {
+  padding-bottom: 2rem;
+  border-bottom: .05rem solid #e5e5e5;
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  margin-top: 0;
+  margin-bottom: 0;
+  line-height: 3rem;
+}
+
+.footer {
+  padding-top: 1rem;
+  color: #777;
+  text-align: center;
+  border-top: .05rem solid #e5e5e5;
+  margin-top: 2rem;
+}
+
+.corpsTop {
+  position: relative;
+  border: 1px solid #ccc;
+  padding: 1em 1em 0.5em 1em;
+  border-radius: 4px 4px 0 0;
+}
+
+.corpsBottom {
+  border-top: 0;
+  border-radius: 0px 0px 4px 4px;
+  border: 1px solid #ccc;
+  padding: 1em;
+  margin-bottom: 10px
+  overflow-x: auto;
+  color: #333;
+  background: #f8f8f8;
+}
+
+.corpsBottom h3 {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
