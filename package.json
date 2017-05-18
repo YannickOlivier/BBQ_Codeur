@@ -1,0 +1,26 @@
+{
+  "name": "bbq_codeur",
+  "version": "1.0.0",
+  "description": "school project",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "nodemon server/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YannickOlivier/BBQ_Codeur.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YannickOlivier/BBQ_Codeur/issues"
+  },
+  "homepage": "https://github.com/YannickOlivier/BBQ_Codeur#readme",
+  "dependencies": {
+    "express": "^4.15.2",
+    "fluent-ffmpeg": "^2.1.2",
+    "nodemon": "^1.11.0",
+    "socket.io": "^1.7.3"
+  }
+}
