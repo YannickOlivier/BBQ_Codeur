@@ -9,8 +9,8 @@ let ffmpegHandler = require('./ffmpegHandler').handleJob(BBQEvent);
 let fs = require('fs');
 let ffmpeg = require('fluent-ffmpeg');
 const crypto = require('crypto');
-ffmpeg.setFfmpegPath('../common/bin/ffmpeg.exe');
-ffmpeg.setFfprobePath('../common/bin/ffprobe.exe');
+ffmpeg.setFfmpegPath(path.join(__dirname, '../common/bin/ffmpeg.exe'));
+ffmpeg.setFfprobePath(path.join(__dirname, '../common/bin/ffprobe.exe'));
 let WatchIO = require('watch.io'),
   watcher = new WatchIO();
 
@@ -78,14 +78,27 @@ io.sockets.on('connection', function (socket) {
 
 
 //Job Section
-watcher.watch(path.join(__dirname, '../common/tmp')); //WatchFolder !!! A metre dans une fonction pour gestion depuis interface
+/*watcher.watch(path.join(__dirname, '../common/tmp')); //WatchFolder !!! A metre dans une fonction pour gestion depuis interface
 
 watcher.on('create', function ( file, stat ) {
-    console.log('New file created: '+file);
-});
-let jobs ={};
+    console.log('New file cregggated: '+file+' - '+JSON.stringify(stat));
+    //newJob({ path: file });
+}); */
 
-let newJob = function (parameters) {
+fs.watch(path.join(__dirname, '../common/tmp'), (eventType, filename) => {
+  console.log(filename+ '   '+eventType);
+  if(filename){
+    console.log(path.join(__dirname, '../common/tmp/',filename));
+    fs.stat(path.join(__dirname, '../common/tmp/',filename), function(err, stat){
+      console.log(stat)
+    });
+  }
+}); 
+
+
+var jobs ={};
+
+var newJob = function (parameters) {
   try{
     let jobID = crypto.randomBytes(32).toString('hex');
     jobs[jobID] = new BBQJob(jobID, parameters);
@@ -96,15 +109,20 @@ let newJob = function (parameters) {
   return;
 };
 
-let BBQJob = function (jobID, parameters) {
-  this.id = jobID;
-  this.cancelJob = function(){
-
+var BBQJob = function (jobID, parameters) {
+  var self = this;
+  self.id = jobID;
+  self.cancelJob = function(){
+    self.ffmpegProcess.kill();
   }; 
-  this.ffmpegProcess = ffmpeg();
-  console.log(parameters.name);
+  self.ffmpegProcess = ffmpeg(parameters.path)
+                        .videoCodec('libx264')
+                        .on('progress', function(progress) {
+                          console.log('Processing: ' + progress.percent + '% done');
+                        })
+                        .save('D:/WOODY/output.mp4');
+  console.log('Transcoding: '+parameters.path);
 };
-
 
 
 try{
