@@ -1,5 +1,4 @@
-var bbq = '';
-var profile = '';
+var bbq = {};
 
 jQuery(function ($) {
 
@@ -11,7 +10,17 @@ jQuery(function ($) {
     //On change le nom du profile dans la liste
     console.log('Nouveau profile');
 
+    $('#listProfil').change(updateProfile);
 
+    function updateProfile(){
+        var profilName = $('#listProfil').val();
+        $('#NameProfil').val(profilName);
+        $('#Format').val(bbq.profile[profilName].Format);
+        $('#vCodec').val(bbq.profile[profilName].vCodec);
+        $('#aCodec').val(bbq.profile[profilName].aCodec);
+        $('#FrameRate').val(bbq.profile[profilName].Format);
+        $('#WPP').val(bbq.profile[profilName].Format);   
+    }
     // On change les valeurs des paramètres en fonction du profil choisis
   //  console.log('Changement des paramètres')
   //  $('#listProfil').change(function())
@@ -48,18 +57,10 @@ jQuery(function ($) {
       bbq.profile = profile;
       var liste = '';
       for(var i in profile) {
-      liste += '<option>'+i+'</option>';
-          $('#listProfil').change(function(){
-              console.log('Affichage des paramètres');
-              $('#NameProfil').val(this.value);
-              $('#Format').val(profile[this.value].Format);
-              $('#vCodec').val(profile[this.value].vCodec);
-              $('#aCodec').val(profile[this.value].aCodec);
-              $('#FrameRate').val(profile[this.value].Format);
-              $('#WPP').val(profile[this.value].Format);
-          });
+        liste += '<option>'+i+'</option>';
       }
       $('#listProfil').html(liste);
+      updateProfile();
     });
 
 });
