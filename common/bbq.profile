@@ -1,1 +1,1 @@
-{"Profil 2":{"name":"Profil 2","Format":"3840*2160","vCodec":"x265","aCodec":"AAC"},"Profil 1":{"name":"Profil 1","Format":"3840*2160","vCodec":"x265","aCodec":"AAC"}}
+{"Profil 2":{"name":"Profil 2","Format":"3840*2160","vCodec":"x265","aCodec":"AAC"},"Profil 1":{"name":"Profil 1","Format":"3840*2160","vCodec":"x265","aCodec":"AAC"},"HEVC 25Mbs":{"name":"HEVC 25Mbs","Format":"1920*1080","vCodec":"x264","aCodec":"PCM"}}
