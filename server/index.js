@@ -1,6 +1,6 @@
-let express = require('express');  
-let app = express();  
-let server = require('http').createServer(app);  
+let express = require('express');
+let app = express();
+let server = require('http').createServer(app);
 let io = require('socket.io')(server);
 let path = require('path');
 const EventEmitter = require('events');
@@ -91,7 +91,7 @@ fs.watch(path.join(__dirname, '../common/tmp'), (eventType, filename) => {
       console.log(stat)
     });
   }
-}); 
+});
 
 
 var jobs ={};
@@ -112,7 +112,7 @@ var BBQJob = function (jobID, parameters) {
   self.id = jobID;
   self.cancelJob = function(){
     self.ffmpegProcess.kill();
-  }; 
+  };
   self.ffmpegProcess = ffmpeg(parameters.path)
                         .videoCodec('libx264')
                         .on('progress', function(progress) {
@@ -129,5 +129,3 @@ try{
 catch(e){
   BBQEvent.emit('error',e);
 }
-
-
