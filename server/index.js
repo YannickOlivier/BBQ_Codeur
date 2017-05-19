@@ -61,6 +61,7 @@ io.sockets.on('connection', function (socket) {
     socket.emit('profile', profile);
     return;
   });
+
   socket.on('deleteProfile', function(request){
     console.log('Delete Profile: '+request.name);
     try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; console.log('error: '+e.message);}
@@ -87,9 +88,7 @@ fs.watch(path.join(__dirname, '../common/tmp'), (eventType, filename) => {
   console.log(filename+ '   '+eventType);
   if(filename){
     console.log(path.join(__dirname, '../common/tmp/',filename));
-    fs.stat(path.join(__dirname, '../common/tmp/',filename), function(err, stat){
-      console.log(stat)
-    });
+
   }
 });
 
