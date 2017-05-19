@@ -1,23 +1,16 @@
+var bbq = '';
+var profile = '';
+
 jQuery(function ($) {
 
     var socket = io('http://localhost:8080');
-    var bbq = '';
 
     // chaque chargement
     socket.emit('getProfile');
 
     //On change le nom du profile dans la liste
     console.log('Nouveau profile');
-    $('#listProfil').change(function(){
-      console.log(this.value);
-      console.log(bbq.profile);
-        $('#NameProfil').val(this.value);
-        $('#Format').val(bbq.profile[this.value].Format);
-        $('#vCodec').val(this.value);
-        $('#aCodec').val(this.value);
-        $('#FrameRate').val(this.value);
-        $('#WPP').val(this.value);
-    });
+
 
     // On change les valeurs des paramètres en fonction du profil choisis
   //  console.log('Changement des paramètres')
@@ -40,6 +33,14 @@ jQuery(function ($) {
         });
     });
 
+    // Suppression d'un profil
+    $('#DeleteProfil').click(function() {
+        console.log('Requête de suppression du profil')
+        socket.emit('DeleteProfil', {
+          name:$('#NameProfil').val(),
+        });
+    });
+
     // Mise à jour des profils
     socket.on('profile', function(profile) {
       console.log('Réception des profils');
@@ -48,8 +49,16 @@ jQuery(function ($) {
       var liste = '';
       for(var i in profile) {
       liste += '<option>'+i+'</option>';
+          $('#listProfil').change(function(){
+              console.log('Affichage des paramètres');
+              $('#NameProfil').val(this.value);
+              $('#Format').val(profile[this.value].Format);
+              $('#vCodec').val(profile[this.value].vCodec);
+              $('#aCodec').val(profile[this.value].aCodec);
+              $('#FrameRate').val(profile[this.value].Format);
+              $('#WPP').val(profile[this.value].Format);
+          });
       }
-
       $('#listProfil').html(liste);
     });
 
