@@ -36,8 +36,8 @@ jQuery(function ($) {
     // Suppression d'un profil
     $('#DeleteProfil').click(function() {
         console.log('Requête de suppression du profil')
-        socket.emit('DeleteProfil', {
-          name:$('#NameProfil').val(),
+        socket.emit('deleteProfile', {
+          name:$('#NameProfil').val()
         });
     });
 
