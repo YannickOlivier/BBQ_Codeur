@@ -53,7 +53,6 @@ io.sockets.on('connection', function (socket) {
   });
 
   socket.on('updateProfile', function(request){
-    console.log(JSON.stringify(request));
     console.log('Update Profile');
     try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; console.log('error: '+e.message);}
     profile[request.name] = request;
@@ -63,13 +62,12 @@ io.sockets.on('connection', function (socket) {
     return;
   });
   socket.on('deleteProfile', function(request){
-    console.log(JSON.stringify(request));
-    console.log('Update Profile');
+    console.log('Delete Profile: '+request.name);
     try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; console.log('error: '+e.message);}
-    profile[request.name] = null;
+    delete(profile[request.name]);
     tempString = JSON.stringify(profile);
     fs.writeFileSync(path.join(__dirname, '../common/bbq.profile'), tempString);
-    socket.emit('profile', JSON.parse(tempString));
+    socket.emit('profile', profile);
     return;
   });
 
