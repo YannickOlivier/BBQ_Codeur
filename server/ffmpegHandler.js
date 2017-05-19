@@ -6,7 +6,7 @@ ffmpeg.setFfprobePath('../common/bin/ffprobe.exe');
 let WatchIO = require('watch.io'),
   watcher = new WatchIO();
 
-watcher.watch(path.join(__dirname, '../common/tmp'));
+watcher.watch(path.join(__dirname, '../common/tmp')); //WatchFolder !!! A metre dans une fonction pour gestion depuis interface
 
 watcher.on('create', function ( file, stat ) {
     console.log('New file created: '+file);
@@ -15,7 +15,7 @@ watcher.on('create', function ( file, stat ) {
 
 let jobs ={};
 let BBQEvent = {} 
-let handleJob = function (jobEmitter) {
+let handleJob = function (jobEmitter, socket) {
   BBQEvent = jobEmitter;
   jobEmitter.on('job', (job) => {
     switch(job.type){
@@ -30,7 +30,7 @@ let handleJob = function (jobEmitter) {
   });
 };
 
-let Job = function (parameters) {
+let newJob = function (parameters) {
   try{
     let jobID = crypto.randomBytes(32).toString('hex');
     jobs[jobID] = new BBQJob(jobID, parameters);
@@ -42,7 +42,11 @@ let Job = function (parameters) {
 }
 
 let BBQJob = function (jobID, parameters) {
+  this.cancelJob = function(){
+
+  }; 
+  this.ffmpegProcess = ffmpeg();
   console.log(parameters.name);
 };
 
-module.exports.handleJob = handleJob
+module.exports.handleJob = handleJob;
