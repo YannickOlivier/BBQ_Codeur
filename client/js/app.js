@@ -3,12 +3,25 @@ jQuery(function ($) {
     var socket = io('http://localhost:8080');
     var bbq = '';
 
+    // chaque chargement
+    socket.emit('getProfile');
+
     //On change le nom du profile dans la liste
     console.log('Nouveau profile');
     $('#listProfil').change(function(){
+      console.log(this.value);
+      console.log(bbq.profile);
         $('#NameProfil').val(this.value);
+        $('#Format').val(bbq.profile[this.value].Format);
+        $('#vCodec').val(this.value);
+        $('#aCodec').val(this.value);
+        $('#FrameRate').val(this.value);
+        $('#WPP').val(this.value);
     });
 
+    // On change les valeurs des paramètres en fonction du profil choisis
+  //  console.log('Changement des paramètres')
+  //  $('#listProfil').change(function())
 
     // On set VAL '' à l'ID NameProfil
     $('#NewProfil').click(function(el){
@@ -28,42 +41,18 @@ jQuery(function ($) {
     });
 
     // Mise à jour des profils
-    console.log('Requête des profils existants')
-    socket.emit('ListDesProfils', {
-    }
-
     socket.on('profile', function(profile) {
-        console.log('Réception des profils');
-        
+      console.log('Réception des profils');
+      console.log(profile);
+      bbq.profile = profile;
+      var liste = '';
+      for(var i in profile) {
+      liste += '<option>'+i+'</option>';
+      }
 
-      if(request.type === 'all'){
-        console.log('Get All Profile');
-        fs.readFile((path.join(__dirname, '../common/bbq.profile')), (err, data) => {
-          if(err){
-            socket.emit('profile', {
-              error: err
-            });
-          }
-          else{
-            socket.emit('profile', JSON.parse(data));
-            console.log('All profile sent');
-          }
-        });
-      }
-      else{
-        console.log('Get '+request.name+' Profile');
-        fs.readFile((path.join(__dirname, '../common/bbq.profile')), (err, data) => {
-          if(err){
-            socket.emit('profile', {
-              error: err
-            });
-          }
-          else{
-            socket.emit('profile', JSON.parse(data)[request.name]);
-            console.log('All profile sent');
-          }
-        });
-      }
+      $('#listProfil').html(liste);
     });
 
 });
+
+//deleteprofil name jquerry
