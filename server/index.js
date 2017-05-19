@@ -33,6 +33,7 @@ io.sockets.on('connection', function (socket) {
         deleteJob(job.jobID);
       break;
     }
+    return;
   });
 
   socket.on('getProfile', function(request){
@@ -48,6 +49,7 @@ io.sockets.on('connection', function (socket) {
         console.log('All profile sent');
       }
     });
+    return;
   });
 
   socket.on('updateProfile', function(request){
@@ -58,8 +60,18 @@ io.sockets.on('connection', function (socket) {
     tempString = JSON.stringify(profile);
     fs.writeFileSync(path.join(__dirname, '../common/bbq.profile'), tempString);
     socket.emit('profile', profile);
+    return;
   });
-
+  socket.on('deleteProfile', function(request){
+    console.log(JSON.stringify(request));
+    console.log('Update Profile');
+    try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; console.log('error: '+e.message);}
+    profile[request.name] = null;
+    tempString = JSON.stringify(profile);
+    fs.writeFileSync(path.join(__dirname, '../common/bbq.profile'), tempString);
+    socket.emit('profile', JSON.parse(tempString));
+    return;
+  });
 
   console.log('New user connected');
 });
@@ -81,6 +93,7 @@ let newJob = function (parameters) {
   catch(e){
     BBQEvent.emit('error', e);
   }
+  return;
 };
 
 let BBQJob = function (jobID, parameters) {
