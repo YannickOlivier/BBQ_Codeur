@@ -162,18 +162,12 @@ var BBQJob = function (jobID, parameters) {
     self.cancelJob = function(){
       self.ffmpegProcess.kill();
     };
-    fs.readFile((path.join(__dirname, '../common/profiles/bbq.profile')), (err, data) => {
-        if(err){
-        }
-        else{
-          var profile = JSON.parse(data)[parameters.profile];
-          self.profile = profile;
-        }
-      });
+    var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile')))[parameters.profile];
+    self.profile = profile;
     self.ffmpegProcess = ffmpeg(parameters.path)
                           .videoCodec('libx264')
                           .size(profile.Format)
-                          .audioCodec(profile.aCodec == 'AAC' ? 'libfaac': 'pcm_s32le ')
+                          .audioCodec(profile.aCodec == 'AAC' ? 'aac': 'pcm_s16le')
                           .on('progress', function(progress) {
                             console.log('Processing: ' + progress.percent + '% done');
                           })
