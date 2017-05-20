@@ -75,4 +75,10 @@ jQuery(function ($) {
 
 });
 
+// Shutdown du serveur
+$('#Shutdown').click(function() {
+    console.log('Shutdown du serveur')
+    socket.emit('shutdown', {
+    });
+});
 //deleteprofil name jquerry
