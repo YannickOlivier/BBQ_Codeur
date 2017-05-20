@@ -156,26 +156,32 @@ var newJob = function (parameters) {
 
 var BBQJob = function (jobID, parameters) {
   var self = this;
-  self.id = jobID;
-  self.cancelJob = function(){
-    self.ffmpegProcess.kill();
-  };
-  fs.readFile((path.join(__dirname, '../common/profiles/bbq.profile')), (err, data) => {
-      if(err){
-      }
-      else{
-        self.profile = JSON.parse(data)[parameters.profile];
-      }
-    });
-  self.ffmpegProcess = ffmpeg(parameters.path)
-                        .videoCodec('libx264')
-                        .size(this.profile.Format)
-                        .audioCodec(this.profile.aCodec == 'AAC' ? 'libfaac': 'pcm_s32le ')
-                        .on('progress', function(progress) {
-                          console.log('Processing: ' + progress.percent + '% done');
-                        })
-                        .save('D:/WOODY/output.mp4');
-  console.log('Transcoding: '+parameters.path);
+  try{
+    self.id = jobID;
+    self.cancelJob = function(){
+      self.ffmpegProcess.kill();
+    };
+    fs.readFile((path.join(__dirname, '../common/profiles/bbq.profile')), (err, data) => {
+        if(err){
+        }
+        else{
+          self.profile = JSON.parse(data)[parameters.profile];
+        }
+      });
+    self.ffmpegProcess = ffmpeg(parameters.path)
+                          .videoCodec('libx264')
+                          .size(self.profile.Format)
+                          .audioCodec(self.profile.aCodec == 'AAC' ? 'libfaac': 'pcm_s32le ')
+                          .on('progress', function(progress) {
+                            console.log('Processing: ' + progress.percent + '% done');
+                          })
+                          .save('D:/WOODY/output.mp4');
+    console.log('Transcoding: '+parameters.path);
+
+  }
+  catch(e){
+    console.log('ERRROR during transcode: '+e.message);
+  }
 };
 
 
