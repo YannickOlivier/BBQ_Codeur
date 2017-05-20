@@ -22,6 +22,7 @@ app.use('/public', express.static(path.join(__dirname, '../client')));
 app.get('/', function (req, res) { res.sendFile(path.join(__dirname, '../client/index.html')); });
 app.get('/index.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/index.html')); });
 app.get('/profiles.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/profiles.html')); });
+app.get('/shutdown.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/shutdown.html')); });
 
 app.post('/upload', function(req, res){
 
@@ -119,6 +120,11 @@ io.sockets.on('connection', function (socket) {
     fs.writeFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), tempString);
     socket.emit('profile', profile);
     return;
+  });
+
+  socket.on('shutdown', function(request){
+    console.log('Shutdown request !!');
+    process.exit(0);
   });
 
   console.log('New user connected');
