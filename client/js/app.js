@@ -59,6 +59,15 @@ jQuery(function ($) {
         });
     });
 
+
+    // Shutdown du serveur
+        $('#Shutdown').click(function() {
+            console.log('Shutdown du serveur')
+            socket.emit('shutdown', {
+            });
+        });
+
+
     // Mise à jour des profils
     socket.on('profile', function(profile) {
       console.log('Réception des profils');
@@ -75,10 +84,5 @@ jQuery(function ($) {
 
 });
 
-// Shutdown du serveur
-$('#Shutdown').click(function() {
-    console.log('Shutdown du serveur')
-    socket.emit('shutdown', {
-    });
-});
+
 //deleteprofil name jquerry
