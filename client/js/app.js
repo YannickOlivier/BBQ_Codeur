@@ -18,8 +18,8 @@ jQuery(function ($) {
         $('#Format').val(bbq.profile[profilName].Format);
         $('#vCodec').val(bbq.profile[profilName].vCodec);
         $('#aCodec').val(bbq.profile[profilName].aCodec);
-        $('#FrameRate').val(bbq.profile[profilName].Format);
-        $('#WPP').val(bbq.profile[profilName].Format);   
+        $('#FrameRate').val(bbq.profile[profilName].FrameRate);
+        $('#WPP').val(bbq.profile[profilName].WPP);
     }
     // On change les valeurs des paramètres en fonction du profil choisis
   //  console.log('Changement des paramètres')
@@ -39,6 +39,8 @@ jQuery(function ($) {
           Format:$('#Format').val(),
           vCodec:$('#vCodec').val(),
           aCodec:$('#aCodec').val(),
+          FrameRate:$('#FrameRate').val(),
+          WPP:$('#WPP').val(),
         });
     });
 
