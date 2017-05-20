@@ -39,7 +39,9 @@ app.post('/upload', function(req, res){
   form.on('file', function(field, file) {
     fs.rename(file.path, path.join(form.uploadDir, file.name));
   });
-
+  form.on('fileBegin', function(name, file) {
+    console.log('Starting file upload: '+name);
+  });
   // log any errors that occur
   form.on('error', function(err) {
     console.log('An error has occured: \n' + err);
@@ -72,17 +74,20 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('getProfile', function(request){
     console.log('Get All Profile');
-    fs.readFile((path.join(__dirname, '../common/bbq.profile')), (err, data) => {
-      if(err){
-        socket.emit('profile', {
-          error: err
-        });
-      }
-      else{
-        socket.emit('profile', JSON.parse(data));
-        console.log('All profile sent');
-      }
-    });
+    try{
+      fs.readFile((path.join(__dirname, '../common/bbq.profile')), (err, data) => {
+        if(err){
+          socket.emit('profile', {
+            error: err
+          });
+        }
+        else{
+          socket.emit('profile', JSON.parse(data));
+          console.log('All profile sent');
+        }
+      });
+    }
+    catch(e){console.log('Error getting Profile: '+e.message);}
     return;
   });
 
@@ -165,9 +170,4 @@ var BBQJob = function (jobID, parameters) {
 };
 
 
-try{
-  server.listen(8080);
-}
-catch(e){
-  BBQEvent.emit('error',e);
-}
+try{ server.listen(8080); } catch(e){ BBQEvent.emit('error',e); }
