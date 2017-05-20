@@ -1,4 +1,5 @@
 let express = require('express');
+let formidable = require('formidable');
 let app = express();
 let server = require('http').createServer(app);
 let io = require('socket.io')(server);
@@ -21,6 +22,39 @@ app.use('/public', express.static(path.join(__dirname, '../client')));
 app.get('/', function (req, res) { res.sendFile(path.join(__dirname, '../client/index.html')); });
 app.get('/index.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/index.html')); });
 app.get('/profiles.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/profiles.html')); });
+
+app.post('/upload', function(req, res){
+
+  // create an incoming form object
+  var form = new formidable.IncomingForm();
+
+  // specify that we want to allow the user to upload multiple files in a single request
+  form.multiples = true;
+
+  // store all uploads in the /uploads directory
+  form.uploadDir = path.join(__dirname, '/uploads');
+
+  // every time a file has been uploaded successfully,
+  // rename it to it's orignal name
+  form.on('file', function(field, file) {
+    fs.rename(file.path, path.join(form.uploadDir, file.name));
+  });
+
+  // log any errors that occur
+  form.on('error', function(err) {
+    console.log('An error has occured: \n' + err);
+  });
+
+  // once all the files have been uploaded, send a response to the client
+  form.on('end', function() {
+    res.end('success');
+  });
+
+  // parse the incoming request containing the form data
+  form.parse(req);
+
+});
+
 
 io.sockets.on('connection', function (socket) {
   socket.on('job', function(job){
@@ -84,13 +118,13 @@ watcher.on('create', function ( file, stat ) {
     //newJob({ path: file });
 }); */
 
-fs.watch(path.join(__dirname, '../common/tmp'), (eventType, filename) => {
+/*fs.watch(path.join(__dirname, '../common/tmp'), (eventType, filename) => {
   console.log(filename+ '   '+eventType);
   if(filename){
     console.log(path.join(__dirname, '../common/tmp/',filename));
 
   }
-});
+}); */
 
 
 var jobs ={};
@@ -112,8 +146,17 @@ var BBQJob = function (jobID, parameters) {
   self.cancelJob = function(){
     self.ffmpegProcess.kill();
   };
+  fs.readFile((path.join(__dirname, '../common/bbq.profile')), (err, data) => {
+      if(err){
+      }
+      else{
+        self.profile = JSON.parse(data)[parameters.profile];
+      }
+    });
   self.ffmpegProcess = ffmpeg(parameters.path)
                         .videoCodec('libx264')
+                        .size(this.profile.Format)
+                        .audioCodec(this.profile.aCodec == 'AAC' ? 'libfaac': 'pcm_s32le ')
                         .on('progress', function(progress) {
                           console.log('Processing: ' + progress.percent + '% done');
                         })

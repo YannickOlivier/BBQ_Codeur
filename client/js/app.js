@@ -18,8 +18,13 @@ jQuery(function ($) {
         $('#Format').val(bbq.profile[profilName].Format);
         $('#vCodec').val(bbq.profile[profilName].vCodec);
         $('#aCodec').val(bbq.profile[profilName].aCodec);
+<<<<<<< HEAD
         $('#FrameRate').val(bbq.profile[profilName].FrameRate);
         $('#WPP').val(bbq.profile[profilName].WPP);
+=======
+        $('#FrameRate').val(bbq.profile[profilName].Format);
+        $('#WPP').val(bbq.profile[profilName].Format);   
+>>>>>>> origin/master
     }
     // On change les valeurs des paramètres en fonction du profil choisis
   //  console.log('Changement des paramètres')
