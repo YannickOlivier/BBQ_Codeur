@@ -57,7 +57,6 @@ app.post('/upload', function(req, res){
 
 });
 
-
 io.sockets.on('connection', function (socket) {
   socket.on('job', function(job){
     switch(job.type){
@@ -75,7 +74,7 @@ io.sockets.on('connection', function (socket) {
   socket.on('getProfile', function(request){
     console.log('Get All Profile');
     try{
-      fs.readFile((path.join(__dirname, '../common/bbq.profile')), (err, data) => {
+      fs.readFile((path.join(__dirname, '../common/profiles/bbq.profile')), (err, data) => {
         if(err){
           socket.emit('profile', {
             error: err
@@ -93,20 +92,20 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('updateProfile', function(request){
     console.log('Update Profile');
-    try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; console.log('error: '+e.message);}
+    try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; console.log('error: '+e.message);}
     profile[request.name] = request;
     tempString = JSON.stringify(profile);
-    fs.writeFileSync(path.join(__dirname, '../common/bbq.profile'), tempString);
+    fs.writeFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), tempString);
     socket.emit('profile', profile);
     return;
   });
 
   socket.on('deleteProfile', function(request){
     console.log('Delete Profile: '+request.name);
-    try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; console.log('error: '+e.message);}
+    try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; console.log('error: '+e.message);}
     delete(profile[request.name]);
     tempString = JSON.stringify(profile);
-    fs.writeFileSync(path.join(__dirname, '../common/bbq.profile'), tempString);
+    fs.writeFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), tempString);
     socket.emit('profile', profile);
     return;
   });
@@ -151,7 +150,7 @@ var BBQJob = function (jobID, parameters) {
   self.cancelJob = function(){
     self.ffmpegProcess.kill();
   };
-  fs.readFile((path.join(__dirname, '../common/bbq.profile')), (err, data) => {
+  fs.readFile((path.join(__dirname, '../common/profiles/bbq.profile')), (err, data) => {
       if(err){
       }
       else{
