@@ -39,6 +39,7 @@ app.post('/upload', function(req, res){
   form.on('file', function(field, file) {
     fs.rename(file.path, path.join(form.uploadDir, file.name));
     parameters.path = path.join(form.uploadDir, file.name);
+    parameters.name = file.name;
   });
   form.on('fileBegin', function(name, file) {
     console.log('Starting file upload: '+name);
@@ -165,17 +166,18 @@ var BBQJob = function (jobID, parameters) {
         if(err){
         }
         else{
-          self.profile = JSON.parse(data)[parameters.profile];
+          var profile = JSON.parse(data)[parameters.profile];
+          self.profile = profile;
         }
       });
     self.ffmpegProcess = ffmpeg(parameters.path)
                           .videoCodec('libx264')
-                          .size(self.profile.Format)
-                          .audioCodec(self.profile.aCodec == 'AAC' ? 'libfaac': 'pcm_s32le ')
+                          .size(profile.Format)
+                          .audioCodec(profile.aCodec == 'AAC' ? 'libfaac': 'pcm_s32le ')
                           .on('progress', function(progress) {
                             console.log('Processing: ' + progress.percent + '% done');
                           })
-                          .save('D:/WOODY/output.mp4');
+                          .save(path.join(__dirname, '../common/output',parameters.name));
     console.log('Transcoding: '+parameters.path);
 
   }
