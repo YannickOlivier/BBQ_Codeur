@@ -79,7 +79,7 @@
                               </tr>
                               <tr>
                                   <td>
-                                      <span class="glyphicon glyphicon-retweet text-info"></span><a href="reboot.html">Reboot</a>
+                                      <span class="glyphicon glyphicon-retweet text-info"></span><a href="index.html">Reboot</a>
                                   </td>
                               </tr>
                           </table>
@@ -90,70 +90,14 @@
           </div>
           <div class="col-sm-9 col-md-9">
               <div class="corpsTop">
-                          <h3> Choix du mode de l'utilisateur : </h3>
-                          <input id="toggle-trigger" type="checkbox" checked data-toggle="toggle" data-on="User Mode" data-off="Expert Mode" data-onstyle="success" data-offstyle="danger">
-                          <button class="btn btn-success" onclick="toggleOn()">User Mode</button>
-                          <button class="btn btn-danger" onclick="toggleOff()">Expert Mode</button>
-                          <script>
-                          function toggleOn() {
-                            $('#toggle-trigger').bootstrapToggle('on')
-                          }
-                          function toggleOff() {
-                            $('#toggle-trigger').bootstrapToggle('off')
-                          }
-                          </script>
             	</div>
               <div class="corpsBottom">
-                <h3> Création et modification des profils </h3>
+                <h3> Administration du serveur Node.JS </h3>
                 <br>
-                    <div class"forme-group">
-                      <button type="button" class"btn btn-default" id="NewProfil">Nouveau profil</button>
-                    </div>
-                    <br>
-                    <div class"form-group">
-                        <label for="listProfil">Choix du profil d'encodage :</label>
-                        <select class="form-control" placeholder="Choix du profil" id="listProfil">
-                        </select>
-                        <label for="description">Nom du profile :</label>
-                        <input type="text" class="form-control" id="NameProfil">
-                        <label for="Format">Résolution :</label>
-                        <select class="form-control" id="Format" placeholder="Résolution">
-                            <option>3840x2160</option>
-                            <option>1920x1080</option>
-                            <option>1280x720</option>
-                        </select>
-                        <label for="vCodec">Codec vidéo :</label>
-                        <select class="form-control" id="vCodec" placeholder="Codec Video">
-                            <option>x265</option>
-                            <option>x264</option>
-                        </select>
-                        <label for="aCodec">Codec audio :</label>
-                        <select class="form-control" id="aCodec" placeholder="Codec Audio">
-                            <option>AAC</option>
-                            <option>PCM</option>
-                        </select>
-                        <label for="FrameRate">Nombre d'images :</label>
-                        <select class="form-control" id="FrameRate" placeholder="FrameRate">
-                            <option>60p</option>
-                            <option>50p</option>
-                            <option>30p</option>
-                            <option>25p</option>
-                        </select>
-                        <label for="WPP">Activer le WPP :</label>
-                        <select class="form-control" id="WPP" placeholder="WPP">
-                            <option>Oui</option>
-                            <option>Non</option>
-                        </select>
-                    <br>
                     <div class"forme-list">
-                      <button type="button" class"btn btn-default" id="SaveProfil">Sauvegarder le profil</button>
-                      <button type="button" class"btn btn-default" id="DeleteProfil">Supprimer le profil</button>
+                      <button type="button" class"btn btn-default" id="Shutdown">Arrêter le serveur</button>
                     </div>
-
               </div>
-
-
-
           </div>
       <div class="footer">
           <h5> Réalisé par Julien et Yannick : projet de fin de première année - ENSEA/INA </h5>
