@@ -182,3 +182,12 @@ var BBQJob = function (jobID, parameters) {
 
 
 try{ server.listen(8080); } catch(e){ BBQEvent.emit('error',e); }
+
+process.on('exit', (code) => {
+		console.log('Exit code: '+code);
+});
+
+process.on('uncaughtException', (err) =>{
+  console.log('FATAL ERROR!!: '+err);
+	//process.exit(1);
+});
