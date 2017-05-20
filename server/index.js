@@ -169,7 +169,7 @@ var BBQJob = function (jobID, parameters) {
                           .size(profile.Format)
                           .audioCodec(profile.aCodec == 'AAC' ? 'aac': 'pcm_s16le')
                           .on('progress', function(progress) {
-                            console.log('Processing: ' + progress.percent + '% done');
+                            console.log('Processing: ' + progress.percent + ' % done');
                           })
                           .save(path.join(__dirname, '../common/output',parameters.name));
     console.log('Transcoding: '+parameters.path);
