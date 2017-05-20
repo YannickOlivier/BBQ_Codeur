@@ -21,6 +21,13 @@ jQuery(function ($) {
         $('#FrameRate').val(bbq.profile[profilName].FrameRate);
         $('#WPP').val(bbq.profile[profilName].WPP);
     }
+
+    function updateProfileNBR(){
+      var nbr = 0;
+      for(var i in bbq.profile)
+        nbr++;
+      $('#nbrProfile').html(''+nbr);
+    }
     // On change les valeurs des paramètres en fonction du profil choisis
   //  console.log('Changement des paramètres')
   //  $('#listProfil').change(function())
@@ -63,6 +70,7 @@ jQuery(function ($) {
       }
       $('#listProfil').html(liste);
       updateProfile();
+      updateProfileNBR();
     });
 
 });
