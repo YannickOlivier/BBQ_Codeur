@@ -27,7 +27,7 @@ app.post('/upload', function(req, res){
 
   // create an incoming form object
   var form = new formidable.IncomingForm();
-
+  var parameters = {};
   // specify that we want to allow the user to upload multiple files in a single request
   form.multiples = true;
 
@@ -38,9 +38,18 @@ app.post('/upload', function(req, res){
   // rename it to it's orignal name
   form.on('file', function(field, file) {
     fs.rename(file.path, path.join(form.uploadDir, file.name));
+    parameters.path = path.join(form.uploadDir, file.name);
   });
   form.on('fileBegin', function(name, file) {
     console.log('Starting file upload: '+name);
+  });
+
+  //On récupere le nom du profile
+  form.on('field', function(name, value) {  
+    if(name == 'profile'){
+      parameters.profile = value;
+      console.log('Profile name receveid: '+value);
+    }
   });
   // log any errors that occur
   form.on('error', function(err) {
@@ -50,6 +59,7 @@ app.post('/upload', function(req, res){
   // once all the files have been uploaded, send a response to the client
   form.on('end', function() {
     res.end('success');
+    newJob(parameters);
   });
 
   // parse the incoming request containing the form data

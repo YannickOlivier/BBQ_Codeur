@@ -9,7 +9,7 @@ $('.upload-btn').on('click', function (){
 
 $('#Transcode').on('click', function(){
   console.log('Transcode demandé');
-  var files = $(this).get(0).files;
+  var files = document.getElementById('inputFiles').files;
 
   if (files.length > 0){
     // create a FormData object which will be sent as the data payload in the
@@ -22,6 +22,7 @@ $('#Transcode').on('click', function(){
 
       // add the files to formData object for the data payload
       formData.append('uploads[]', file, file.name);
+      formData.append('profile', $('#listProfil').val());
     }
 
     $.ajax({
