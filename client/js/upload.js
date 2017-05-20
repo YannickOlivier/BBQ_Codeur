@@ -1,11 +1,14 @@
+jQuery(function ($) {
+
 $('.upload-btn').on('click', function (){
+    console.log('Click sur le bouton Upload-BTN');
     $('#upload-input').click();
     $('.progress-bar').text('0%');
     $('.progress-bar').width('0%');
 });
 
-$('#upload-input').on('change', function(){
-
+$('#Transcode').on('click', function(){
+  console.log('Transcode demandé');
   var files = $(this).get(0).files;
 
   if (files.length > 0){
@@ -60,4 +63,7 @@ $('#upload-input').on('change', function(){
     });
 
   }
+});
+
+
 });
