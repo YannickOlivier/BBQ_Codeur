@@ -4,9 +4,6 @@ let app = express();
 let server = require('http').createServer(app);
 let io = require('socket.io')(server);
 let path = require('path');
-const EventEmitter = require('events');
-let BBQEvent = new EventEmitter();
-let ffmpegHandler = require('./ffmpegHandler').handleJob(BBQEvent);
 let fs = require('fs');
 let ffmpeg = require('fluent-ffmpeg');
 const crypto = require('crypto');
@@ -15,17 +12,62 @@ ffmpeg.setFfprobePath(path.join(__dirname, '../common/bin/ffprobe.exe'));
 let WatchIO = require('watch.io'),
   watcher = new WatchIO();
 
+const colors = {
+ Reset: "\x1b[0m",
+ Bright: "\x1b[1m",
+ Dim: "\x1b[2m",
+ Underscore: "\x1b[4m",
+ Blink: "\x1b[5m",
+ Reverse: "\x1b[7m",
+ Hidden: "\x1b[8m",
+ fg: {
+  Black: "\x1b[30m",
+  Red: "\x1b[31m",
+  Green: "\x1b[32m",
+  Yellow: "\x1b[33m",
+  Blue: "\x1b[34m",
+  Magenta: "\x1b[35m",
+  Cyan: "\x1b[36m",
+  White: "\x1b[37m",
+  Crimson: "\x1b[38m" //القرمزي
+ },
+ bg: {
+  Black: "\x1b[40m",
+  Red: "\x1b[41m",
+  Green: "\x1b[42m",
+  Yellow: "\x1b[43m",
+  Blue: "\x1b[44m",
+  Magenta: "\x1b[45m",
+  Cyan: "\x1b[46m",
+  White: "\x1b[47m",
+  Crimson: "\x1b[48m"
+ }
+};
+
+var ErrorLog = function(text){ console.error(colors.fg.Red + text); };
+var LogInfo = function(text){ console.log(colors.fg.White + text); };
+var LogWarning = function(text){ console.log(colors.fg.Yellow + text); };
+var LogWorkflow = function(text) { console.log(colors.fg.Cyan + text); };
 
 //HTTP / WS Section
 app.use('/public', express.static(path.join(__dirname, '../client')));
 
-app.get('/', function (req, res) { res.sendFile(path.join(__dirname, '../client/index.html')); });
-app.get('/index.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/index.html')); });
-app.get('/profiles.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/profiles.html')); });
-app.get('/shutdown.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/shutdown.html')); });
-app.get('/output.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/output.html')); });
-
-app.post('/upload', function(req, res){
+app.get('/', (req, res) =>{ res.sendFile(path.join(__dirname, '../client/index.html')); });
+app.get('/index.html', (req, res) =>{ res.sendFile(path.join(__dirname, '../client/index.html')); });
+app.get('/profiles.html', (req, res) => { res.sendFile(path.join(__dirname, '../client/profiles.html')); });
+app.get('/shutdown.html', (req, res) => { res.sendFile(path.join(__dirname, '../client/shutdown.html')); });
+app.get('/output.html', (req, res) => { res.sendFile(path.join(__dirname, '../client/output.html')); });
+app.get('/download/:fileName', (req, res) => {
+  var fileName = req.params.fileName;
+  res.download(path.join(__dirname, '../output', res.headersSent), res.headersSent, function(err){
+    if (err) {
+      ErrorLog('ERROR Downloading File! ' + res.headersSent);
+    } else {
+      LogInfo('Downloading ' + res.headersSent);
+    }
+  });
+});
+app.post('/upload', (req, res) => {
 
   // create an incoming form object
   var form = new formidable.IncomingForm();
@@ -44,19 +86,19 @@ app.post('/upload', function(req, res){
     parameters.name = file.name;
   });
   form.on('fileBegin', function(name, file) {
-    console.log('Starting file upload: '+name);
+    LogWorkflow('Starting file upload: '+name);
   });
 
   //On récupere le nom du profile
   form.on('field', function(name, value) {  
     if(name == 'profile'){
       parameters.profile = value;
-      console.log('Profile name receveid: '+value);
+      LogInfo('Profile name receveid: '+value);
     }
   });
   // log any errors that occur
   form.on('error', function(err) {
-    console.log('An error has occured: \n' + err);
+    LogInfo('An error has occured: \n' + err);
   });
 
   // once all the files have been uploaded, send a response to the client
@@ -70,8 +112,8 @@ app.post('/upload', function(req, res){
 
 });
 
-io.sockets.on('connection', function (socket) {
-  socket.on('job', function(job){
+io.sockets.on('connection', (socket) => {
+  socket.on('job', (job) =>{
     switch(job.type){
       case 'new':
         newJob(job.parameters);
@@ -84,8 +126,8 @@ io.sockets.on('connection', function (socket) {
     return;
   });
 
-  socket.on('getProfile', function(request){
-    console.log('Get All Profile');
+  socket.on('getProfile', (request) => {
+    LogInfo('Get All Profile');
     try{
       fs.readFile((path.join(__dirname, '../common/profiles/bbq.profile')), (err, data) => {
         if(err){
@@ -95,17 +137,17 @@ io.sockets.on('connection', function (socket) {
         }
         else{
           socket.emit('profile', JSON.parse(data));
-          console.log('All profile sent');
+          LogInfo('All profile sent');
         }
       });
     }
-    catch(e){console.log('Error getting Profile: '+e.message);}
+    catch(e){ErrorLog('Error getting Profile: '+e.message);}
     return;
   });
 
-  socket.on('updateProfile', function(request){
-    console.log('Update Profile');
-    try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; console.log('error: '+e.message);}
+  socket.on('updateProfile', (request) => {
+    LogInfo('Update Profile');
+    try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; ErrorLog('error: '+e.message);}
     profile[request.name] = request;
     tempString = JSON.stringify(profile);
     fs.writeFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), tempString);
@@ -113,9 +155,9 @@ io.sockets.on('connection', function (socket) {
     return;
   });
 
-  socket.on('deleteProfile', function(request){
-    console.log('Delete Profile: '+request.name);
-    try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; console.log('error: '+e.message);}
+  socket.on('deleteProfile', (request) => {
+    LogInfo('Delete Profile: '+request.name);
+    try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; ErrorLog('error: '+e.message);}
     delete(profile[request.name]);
     tempString = JSON.stringify(profile);
     fs.writeFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), tempString);
@@ -123,12 +165,12 @@ io.sockets.on('connection', function (socket) {
     return;
   });
 
-  socket.on('shutdown', function(request){
-    console.log('Shutdown request !!');
+  socket.on('shutdown', (request) =>{
+    LogInfo('Shutdown request !!');
     process.exit(0);
   });
 
-  console.log('New user connected');
+  LogWorkflow('New user connected');
 });
 
 
@@ -136,14 +178,14 @@ io.sockets.on('connection', function (socket) {
 /*watcher.watch(path.join(__dirname, '../common/tmp')); //WatchFolder !!! A metre dans une fonction pour gestion depuis interface
 
 watcher.on('create', function ( file, stat ) {
-    console.log('New file cregggated: '+file+' - '+JSON.stringify(stat));
+    LogInfo('New file cregggated: '+file+' - '+JSON.stringify(stat));
     //newJob({ path: file });
 }); */
 
 /*fs.watch(path.join(__dirname, '../common/tmp'), (eventType, filename) => {
-  console.log(filename+ '   '+eventType);
+  LogInfo(filename+ '   '+eventType);
   if(filename){
-    console.log(path.join(__dirname, '../common/tmp/',filename));
+    LogInfo(path.join(__dirname, '../common/tmp/',filename));
 
   }
 }); */
@@ -157,7 +199,7 @@ var newJob = function (parameters) {
     jobs[jobID] = new BBQJob(jobID, parameters);
   }
   catch(e){
-    BBQEvent.emit('error', e);
+   ErrorLog('error', e);
   }
   return;
 };
@@ -168,6 +210,7 @@ var BBQJob = function (jobID, parameters) {
     self.id = jobID;
     self.cancelJob = function(){
       self.ffmpegProcess.kill();
+      LogWorkflow('Job '+ jobID + 'Killed');
     };
     var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile')))[parameters.profile];
     self.profile = profile;
@@ -176,26 +219,26 @@ var BBQJob = function (jobID, parameters) {
                           .size(profile.Format)
                           .audioCodec(profile.aCodec == 'AAC' ? 'aac': 'pcm_s16le')
                           .on('progress', function(progress) {
-                            console.log('Processing: ' + progress.percent + ' % done');
+                            //LogInfo('Processing: ' + progress.percent + ' % done');
                             self.monitoring = progress.percent;
                           })
                           .save(path.join(__dirname, '../common/output',parameters.name));
-    console.log('Transcoding: '+parameters.path);
+    LogWorkflow('Transcoding: ' + parameters.name);
 
   }
   catch(e){
-    console.log('ERRROR during transcode: '+e.message);
+    ErrorLog('ERRROR during transcode: '+e.message);
   }
 };
 
 
-try{ server.listen(8080); } catch(e){ BBQEvent.emit('error',e); }
+try{ server.listen(8080); } catch(e){ ErrorLog('error',e); }
 
 process.on('exit', (code) => {
-		console.log('Exit code: '+code);
+		LogInfo('Exit code: '+code);
 });
 
 process.on('uncaughtException', (err) =>{
-  console.log('FATAL ERROR!!: '+err);
+  ErrorLog('FATAL ERROR!!: '+err);
 	//process.exit(1);
 });
