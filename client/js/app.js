@@ -91,6 +91,32 @@ jQuery(function ($) {
     $('[data-toggle="popover"]').popover({
         placement : 'top'
     });
+
+    socket.on('monitoring', function(monitoring){
+      console.log(monitoring)
+      for(var i in monitoring){
+        var name = monitoring[i].name;
+        var id = i;
+        var percent = monitoring[i].percent;
+        var status = monitoring[i].status;
+        var template = ' <div class="flexbox"> \
+                          <button id="close_'+id+'" type="button" class="close flexboxmargin" aria-label="Close"></button> \
+                          <textfichier id="text'+id+'" class="flexboxsmall flexboxmargin" >'+name+'</textfichier> \
+                          <div class="progress flexboxbig flexboxmargin flexboxprogress"> \
+                              <div id="progress'+id+'" class="progress-bar progress-bar-striped active progress-bar-success flexboxprogress" role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100" style="width:'+percent+'%"></div> \
+                          </div>\
+                          <p id="status'+id+'" class="btn btn-sm btn-success flexboxmargin" data-toggle="popover" ">'+status+'</p> \
+                          <button id="download'+id+'" type="button" class="btn btn-sm btndl flexboxmargin">Télécharger</button> \
+                        </div>';
+        $('#monitoring').empty();
+        $(template).appendTo('#monitoring');
+      }
+
+
+
+    });
+
+
 });
 
 });

@@ -218,19 +218,28 @@ io.sockets.on('connection', (socket) => {
 try{
 var monitoringRoutine = new CronJob('* * * * * *', function() {  //Routine toutes les secondes
   for(var i in jobs){
-    if(!monitoring[i])
-      monitoring[i] = {
-        name: jobs[i].name,
-        id: jobs[i].id
-      };
+    if(!monitoring[i]){
+        monitoring[i] = {
+          name: jobs[i].name,
+          id: jobs[i].id
+        };
+    }
     switch(jobs[i].status){
       case 'Transcoding':
         monitoring[i].percent = jobs[i].monitoring;
-        monitoring[i].status = 'Transcoding';
+        monitoring[i].status = 'Transcode';
       break;
       case 'Uploading':
         monitoring[i].percent = jobs[i].monitoring;
-        monitoring[i].status = 'Uploading';
+        monitoring[i].status = 'Upload';
+      break;
+      case 'ERROR':
+        monitoring[i].percent = 100;
+        monitoring[i].status = 'ERROR';
+      break;
+      case 'DONE':
+        monitoring[i].percent = 100;
+        monitoring[i].status = 'DONE';
       break;
     }
   }
@@ -288,12 +297,22 @@ var BBQJob = function (jobID, parameters) {
                             //LogInfo('Processing: ' + progress.percent + ' % done');
                             self.percent = progress.percent;
                           })
-                          .save(path.join(__dirname, '../common/output',parameters.name));
+                          .save(path.join(__dirname, '../common/output',parameters.name))  
+                          .on('end', function() {
+                            self.percent = 100;
+                            self.status = 'DONE';
+                          }) 
+                          .on('error', function(err, stdout, stderr) {
+                            self.percent = 100;
+                            self.status = 'ERROR';
+                          });
     LogWorkflow('Transcoding: ' + parameters.name);
 
   }
   catch(e){
     LogError('During transcode: '+e.message);
+    self.percent = 100;
+    self.status = 'ERROR';
   }
 };
 
