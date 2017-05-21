@@ -11,6 +11,9 @@ textfichier {
 .flexbox {
   display: flex;
   flex-wrap: nowrap;
+  padding-bottom: 5px;
+  border-bottom: solid #ddd 1px;
+  margin-bottom: 5px;
 }
 
 .flexboxmargin {
