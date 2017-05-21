@@ -216,10 +216,7 @@ io.sockets.on('connection', (socket) => {
 
 //Routines
 try{
-var monitoringRoutine = new CronJob('* * * * * *', function() {
-  //Routine toutes les secondes
-  //LogInfo('You will see this message every second');
-
+var monitoringRoutine = new CronJob('* * * * * *', function() {  //Routine toutes les secondes
   for(var i in jobs){
     if(!monitoring[i])
       monitoring[i] = {
@@ -239,11 +236,7 @@ var monitoringRoutine = new CronJob('* * * * * *', function() {
   }
   io.local.emit('monitoring', monitoring);
 
-}, null, true);
-}
-catch(e){
-  LogError('On routine '+e.message);
-}
+}, null, true); } catch(e){ LogError('On routine '+e.message); }
 
 
 //Job Section
