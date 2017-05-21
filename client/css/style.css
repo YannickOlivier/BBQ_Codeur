@@ -3,6 +3,11 @@ body {
   padding-bottom: 2rem;
 }
 
+textfichier {
+  max-width: 100%;
+  font-weight: 700;
+}
+
 .flexbox {
   display: flex;
   flex-wrap: nowrap;
@@ -78,8 +83,4 @@ body {
 .corpsBottom h3 {
   margin-top: 1rem;
   margin-bottom: 1rem;
-}
-
-.progress {
-  margin-top: 0.5rem;
 }
