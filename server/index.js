@@ -236,8 +236,8 @@ var monitoringRoutine = new CronJob('* * * * * *', function() {
         monitoring[i].status = 'Uploading';
       break;
     }
-
   }
+  io.local.emit('monitoring', monitoring);
 
 }, null, true);
 }
