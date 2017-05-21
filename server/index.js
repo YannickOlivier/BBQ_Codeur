@@ -43,8 +43,57 @@ const colors = {
   Crimson: "\x1b[48m"
  }
 };
+var log = console.log;
+console.log = function () {
+    var first_parameter = arguments[0];
+    var other_parameters = Array.prototype.slice.call(arguments, 1);
 
-var LogError = function(text){ console.error(colors.fg.Red + text); };
+    function formatConsoleDate (date) {
+        var hour = date.getHours();
+        var minutes = date.getMinutes();
+        var seconds = date.getSeconds();
+        var milliseconds = date.getMilliseconds();
+
+        return '[' +
+               ((hour < 10) ? '0' + hour: hour) +
+               ':' +
+               ((minutes < 10) ? '0' + minutes: minutes) +
+               ':' +
+               ((seconds < 10) ? '0' + seconds: seconds) +
+               '.' +
+               ('00' + milliseconds).slice(-3) +
+               '] ';
+    }
+
+    log.apply(console, [formatConsoleDate(new Date()) + first_parameter].concat(other_parameters));
+};
+var error = console.error;
+console.error = function () {
+    var first_parameter = arguments[0];
+    var other_parameters = Array.prototype.slice.call(arguments, 1);
+
+    function formatConsoleDate (date) {
+        var hour = date.getHours();
+        var minutes = date.getMinutes();
+        var seconds = date.getSeconds();
+        var milliseconds = date.getMilliseconds();
+
+        return '[' +
+               ((hour < 10) ? '0' + hour: hour) +
+               ':' +
+               ((minutes < 10) ? '0' + minutes: minutes) +
+               ':' +
+               ((seconds < 10) ? '0' + seconds: seconds) +
+               '.' +
+               ('00' + milliseconds).slice(-3) +
+               '] ';
+    }
+
+    error.apply(console, [formatConsoleDate(new Date()) + first_parameter].concat(other_parameters));
+};
+
+
+var LogError = function(text){ console.error('ERROR' + colors.fg.Red + text); };
 var LogInfo = function(text){ console.log(colors.fg.White + text); };
 var LogWarning = function(text){ console.log(colors.fg.Yellow + text); };
 var LogWorkflow = function(text) { console.log(colors.fg.Cyan + text); };
@@ -60,7 +109,6 @@ app.get('/output.html', (req, res) => { res.sendFile(path.join(__dirname, '../cl
 app.get('/download/:fileName', (req, res) => {
   try{
     var fileName = req.params.fileName;
-    LogWarning(fileName);
     res.download(path.join(__dirname, '../common/output', fileName), fileName, function(err){
       if (err) {
         LogError('ERROR Downloading File! ' + err);
@@ -159,7 +207,7 @@ io.sockets.on('connection', (socket) => {
     profile[request.name] = request;
     tempString = JSON.stringify(profile);
     fs.writeFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), tempString);
-    socket.emit('profile', profile);
+    socket.broadcastemit('profile', profile);
     return;
   });
 
@@ -169,12 +217,13 @@ io.sockets.on('connection', (socket) => {
     delete(profile[request.name]);
     tempString = JSON.stringify(profile);
     fs.writeFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), tempString);
-    socket.emit('profile', profile);
+    socket.broadcast('profile', profile);
     return;
   });
 
   socket.on('shutdown', (request) =>{
     LogInfo('Shutdown request !!');
+    socket.broadcast('shutdown', {message: 'Server is shutting down !'} );
     process.exit(0);
   });
 
