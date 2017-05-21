@@ -3,6 +3,30 @@ body {
   padding-bottom: 2rem;
 }
 
+.flexbox {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.flexboxmargin {
+  margin-left: 2px;
+  margin-right: 2px;
+  align-self: center;
+  text-align: center;
+}
+
+.flexboxbig {
+   /* This will be twice as big as the small item. */
+   -webkit-flex: 2 0 0;
+   flex: 2 0 0;
+}
+.flexboxstext {
+   -webkit-flex: 1 0 0;
+   flex: 1 0 0;
+   align-items: center;
+   justify-content: center;
+}
+
 .glyphicon { margin-right:10px; }
 .panel-body { padding:0px; }
 .panel-body table tr td { padding-left: 15px }
@@ -56,6 +80,6 @@ body {
   margin-bottom: 1rem;
 }
 
-.progress-bar {
-  border-top: 1rem;
+.progress {
+  margin-top: 0.5rem;
 }
