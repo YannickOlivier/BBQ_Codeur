@@ -67,6 +67,11 @@ jQuery(function ($) {
             });
         });
 
+        // Arrêt du serveur
+        socket.on('shutdown', function(profile) {
+          console.log('Shutdown coté serveur');
+          confirm("Le serveur vient de s'arrêter")
+        });
 
     // Mise à jour des profils
     socket.on('profile', function(profile) {
@@ -81,6 +86,12 @@ jQuery(function ($) {
       updateProfile();
       updateProfileNBR();
     });
+
+    $(document).ready(function(){
+    $('[data-toggle="popover"]').popover({
+        placement : 'top'
+    });
+});
 
 });
 
