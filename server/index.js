@@ -97,7 +97,58 @@ app.get('/download/:fileName', (req, res) => {
     res.status(500).end();
   }
 });
-app.post('/upload', newUploadJob);
+app.post('/upload', (req, res) => {
+  var jobID = crypto.randomBytes(32).toString('hex');
+  jobs[jobID] = {
+    status: 'Uploading'
+  };
+  // create an incoming form object
+  var form = new formidable.IncomingForm();
+  var parameters = {};
+  // specify that we want to allow the user to upload multiple files in a single request
+  form.multiples = true;
+
+  // store all uploads in the /uploads directory
+  form.uploadDir = path.join(__dirname, '../uploads');
+
+  // every time a file has been uploaded successfully,
+  // rename it to it's orignal name
+  form.on('file', function(field, file) {
+    fs.rename(file.path, path.join(form.uploadDir, file.name));
+    parameters.path = path.join(form.uploadDir, file.name);
+    parameters.name = file.name;
+    jobs[jobID].name = file.name;
+  });
+  form.on('fileBegin', function(name, file) {
+    LogWorkflow('Starting file upload: '+name);
+  });
+
+  form.on('progress', function(bytesReceived, bytesExpected) {
+    jobs[jobID].percent = Math.round((bytesReceived/bytesExpected)*100);
+  });
+  //On récupere le nom du profile
+  form.on('field', function(name, value) {  
+    if(name == 'profile'){
+      parameters.profile = value;
+      LogInfo('Profile name receveid: '+value);
+    }
+  });
+  // log any errors that occur
+  form.on('error', function(err) {
+    LogError('An error has occured: \n' + err);
+  });
+
+  // once all the files have been uploaded, send a response to the client
+  form.on('end', function() {
+    res.end('success');
+    jobs[jobID] = new BBQJob(jobID, parameters);
+  });
+
+  // parse the incoming request containing the form data
+  form.parse(req);
+
+  return;
+});
 
 io.sockets.on('connection', (socket) => {
   socket.on('job', (job) =>{
@@ -212,60 +263,6 @@ watcher.on('create', function ( file, stat ) {
 }); */
 
 
-
-
-var newUploadJob = function (req, res) {
-  var jobID = crypto.randomBytes(32).toString('hex');
-  jobs[jobID] = {
-    status: 'Uploading'
-  };
-  // create an incoming form object
-  var form = new formidable.IncomingForm();
-  var parameters = {};
-  // specify that we want to allow the user to upload multiple files in a single request
-  form.multiples = true;
-
-  // store all uploads in the /uploads directory
-  form.uploadDir = path.join(__dirname, '../uploads');
-
-  // every time a file has been uploaded successfully,
-  // rename it to it's orignal name
-  form.on('file', function(field, file) {
-    fs.rename(file.path, path.join(form.uploadDir, file.name));
-    parameters.path = path.join(form.uploadDir, file.name);
-    parameters.name = file.name;
-    jobs[jobID].name = file.name;
-  });
-  form.on('fileBegin', function(name, file) {
-    LogWorkflow('Starting file upload: '+name);
-  });
-
-  form.on('progress', function(bytesReceived, bytesExpected) {
-    jobs[jobID].percent = Math.round((bytesReceived/bytesExpected)*100);
-  });
-  //On récupere le nom du profile
-  form.on('field', function(name, value) {  
-    if(name == 'profile'){
-      parameters.profile = value;
-      LogInfo('Profile name receveid: '+value);
-    }
-  });
-  // log any errors that occur
-  form.on('error', function(err) {
-    LogError('An error has occured: \n' + err);
-  });
-
-  // once all the files have been uploaded, send a response to the client
-  form.on('end', function() {
-    res.end('success');
-    jobs[jobID] = new BBQJob(jobID, parameters);
-  });
-
-  // parse the incoming request containing the form data
-  form.parse(req);
-
-  return;
-};
 
 var newWFJob = function (parameters) {
   try{
