@@ -23,6 +23,7 @@ app.get('/', function (req, res) { res.sendFile(path.join(__dirname, '../client/
 app.get('/index.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/index.html')); });
 app.get('/profiles.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/profiles.html')); });
 app.get('/shutdown.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/shutdown.html')); });
+app.get('/output.html', function (req, res) { res.sendFile(path.join(__dirname, '../client/output.html')); });
 
 app.post('/upload', function(req, res){
 
