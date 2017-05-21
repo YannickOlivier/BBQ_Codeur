@@ -44,7 +44,7 @@ const colors = {
  }
 };
 
-var ErrorLog = function(text){ console.error(colors.fg.Red + text); };
+var LogError = function(text){ console.error(colors.fg.Red + text); };
 var LogInfo = function(text){ console.log(colors.fg.White + text); };
 var LogWarning = function(text){ console.log(colors.fg.Yellow + text); };
 var LogWorkflow = function(text) { console.log(colors.fg.Cyan + text); };
@@ -58,14 +58,22 @@ app.get('/profiles.html', (req, res) => { res.sendFile(path.join(__dirname, '../
 app.get('/shutdown.html', (req, res) => { res.sendFile(path.join(__dirname, '../client/shutdown.html')); });
 app.get('/output.html', (req, res) => { res.sendFile(path.join(__dirname, '../client/output.html')); });
 app.get('/download/:fileName', (req, res) => {
-  var fileName = req.params.fileName;
-  res.download(path.join(__dirname, '../output', res.headersSent), res.headersSent, function(err){
-    if (err) {
-      ErrorLog('ERROR Downloading File! ' + res.headersSent);
-    } else {
-      LogInfo('Downloading ' + res.headersSent);
-    }
-  });
+  try{
+    var fileName = req.params.fileName;
+    LogWarning(fileName);
+    res.download(path.join(__dirname, '../common/output', fileName), fileName, function(err){
+      if (err) {
+        LogError('ERROR Downloading File! ' + err);
+        res.status(500).end();
+      } else {
+        LogInfo('Downloading ' + fileName);
+      }
+    });
+  }
+  catch(e){
+    LogError('ERROR Downloading ' + fileName + ' ' + e.message);
+    res.status(500).end();
+  }
 });
 app.post('/upload', (req, res) => {
 
@@ -141,13 +149,13 @@ io.sockets.on('connection', (socket) => {
         }
       });
     }
-    catch(e){ErrorLog('Error getting Profile: '+e.message);}
+    catch(e){LogError('Error getting Profile: '+e.message);}
     return;
   });
 
   socket.on('updateProfile', (request) => {
     LogInfo('Update Profile');
-    try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; ErrorLog('error: '+e.message);}
+    try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; LogError('error: '+e.message);}
     profile[request.name] = request;
     tempString = JSON.stringify(profile);
     fs.writeFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), tempString);
@@ -157,7 +165,7 @@ io.sockets.on('connection', (socket) => {
 
   socket.on('deleteProfile', (request) => {
     LogInfo('Delete Profile: '+request.name);
-    try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; ErrorLog('error: '+e.message);}
+    try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; LogError('error: '+e.message);}
     delete(profile[request.name]);
     tempString = JSON.stringify(profile);
     fs.writeFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), tempString);
@@ -199,7 +207,7 @@ var newJob = function (parameters) {
     jobs[jobID] = new BBQJob(jobID, parameters);
   }
   catch(e){
-   ErrorLog('error', e);
+   LogError('error', e);
   }
   return;
 };
@@ -227,18 +235,18 @@ var BBQJob = function (jobID, parameters) {
 
   }
   catch(e){
-    ErrorLog('ERRROR during transcode: '+e.message);
+    LogError('ERRROR during transcode: '+e.message);
   }
 };
 
 
-try{ server.listen(8080); } catch(e){ ErrorLog('error',e); }
+try{ server.listen(8080); } catch(e){ LogError('error',e); }
 
 process.on('exit', (code) => {
 		LogInfo('Exit code: '+code);
 });
 
 process.on('uncaughtException', (err) =>{
-  ErrorLog('FATAL ERROR!!: '+err);
+  LogError('FATAL ERROR!!: '+err);
 	//process.exit(1);
 });
