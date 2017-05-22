@@ -78,7 +78,7 @@ jQuery(function ($) {
         // Arrêt du serveur
         socket.on('shutdown', function(profile) {
           console.log('Shutdown coté serveur');
-          confirm("Le serveur vient de s'arrêter")
+          confirm("Le serveur vient de s'arrêter");
         });
 
     // Mise à jour des profils
@@ -97,17 +97,19 @@ jQuery(function ($) {
 
 
     socket.on('monitoring', function(monitoring){
+      bbq.monitoring = monitoring;
       $('#monitoring').empty();
       for(var i in monitoring){
         var name = monitoring[i].name;
         var id = i;
         var percent = monitoring[i].percent;
         var status = monitoring[i].status;
+        var displayName = monitoring[i].displayName;
         var template = ' <div class="flexbox"> \
                           <button id="'+id+'" type="button" class="close flexboxmargin" aria-label="Close">\
                           <span aria-hidden="true">&times;</span>\
                           </button> \
-                          <textfichier id="text'+id+'" class="flexboxsmall flexboxmargin" >'+name+'</textfichier> \
+                          <textfichier id="text'+id+'" class="flexboxsmall flexboxmargin" >'+displayName+'</textfichier> \
                           <div class="progress flexboxbig flexboxmargin flexboxprogress"> \
                               <div id="progress'+id+'" class="progress-bar progress-bar-striped active progress-bar-success flexboxprogress" role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100" style="width:'+percent+'%">'+percent+'%</div> \
                           </div>\

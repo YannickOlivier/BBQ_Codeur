@@ -10,8 +10,8 @@ const crypto = require('crypto');
 var CronJob = require('cron').CronJob;
 ffmpeg.setFfmpegPath(path.join(__dirname, '../common/bin/ffmpeg.exe'));
 ffmpeg.setFfprobePath(path.join(__dirname, '../common/bin/ffprobe.exe'));
-let WatchIO = require('watch.io'),
-  watcher = new WatchIO();
+/*let WatchIO = require('watch.io'),
+  watcher = new WatchIO(); */
 
 // LOG 
 const colors = {
@@ -254,6 +254,7 @@ var updateMonitoring = function(){
     if(!monitoring[i]){
         monitoring[i] = {
           name: jobs[i].name,
+          displayName: jobs[i].name.length > 15 ? jobs[i].name.substring(0, 12)+'...' : jobs[i].name,
           id: jobs[i].id
         };
     }
@@ -282,8 +283,10 @@ var updateMonitoring = function(){
     }
     if(monitoring[i].name == 'Waiting ...' && monitoring[i].status == 'STOP')
       monitoring[i].name = 'Aborded';    
-    if(monitoring[i].name == 'Waiting ...' && monitoring[i].name != jobs[i].name)
+    if(monitoring[i].name == 'Waiting ...' && monitoring[i].name != jobs[i].name){
       monitoring[i].name = jobs[i].name;
+      monitoring[i].displayName = jobs[i].name.length > 15 ? jobs[i].name.substring(0, 12)+'...' : jobs[i].name;
+    }
   }
   fs.writeFile(path.join(__dirname, '../common/tmp/monitoring/monitoring.json'), JSON.stringify(monitoring), (err) =>{
     if(err)
