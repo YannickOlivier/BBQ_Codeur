@@ -60,6 +60,13 @@ jQuery(function ($) {
         });
     });
 
+    // Clear monitoring
+    $('#clearMonitoring').click(function() {
+        console.log('Suppression du monitoring')
+        socket.emit('clearMonitoring', {
+        });
+    });
+
 
     // Shutdown du serveur
         $('#Shutdown').click(function() {
