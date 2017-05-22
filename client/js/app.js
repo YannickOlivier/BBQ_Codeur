@@ -112,20 +112,8 @@ jQuery(function ($) {
         var status = monitoring[i].status;
         var displayName = monitoring[i].displayName;
         var colored = '';
-
-        var template = ' <div class="flexbox"> \
-                          <button id="'+id+'" type="button" class="close flexboxmargin" aria-label="Close">\
-                          <span aria-hidden="true">&times;</span>\
-                          </button> \
-                          <textfichier id="text'+id+'" class="flexboxsmall flexboxmargin" >'+displayName+'</textfichier> \
-                          <div class="progress flexboxbig flexboxmargin flexboxprogress"> \
-                              <div id="progress'+id+'" class="progress-bar progress-bar-striped active progress-bar-'+colored+' flexboxprogress" role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100" style="width:'+percent+'%">'+percent+'%</div> \
-                          </div>\
-                          <p id="status'+id+'" class="btn btn-sm btn-'+colored+' flexboxmargin" data-toggle="popover" data-content="'+status+'">'+status+'</p> \
-                          <button id="download'+id+'" type="button" class="btn btn-sm btndl flexboxmargin">Télécharger</button> \
-                        </div>';
         switch(monitoring[i].status){
-          case 'Transcoding':
+          case 'Transcode':
               colored = 'success';
             break;
           case 'Uploading':
@@ -142,6 +130,27 @@ jQuery(function ($) {
             break;
         }
         
+          // Test si téléchargement possible
+          var disabled_button = '';
+          var href = 'href="download/';
+            if (monitoring[1].status == ERROR || monitoring[1].satus == STOP) {
+          disabled_button = 'disabled';
+          } else {
+          disabled_button = '';
+         }
+
+        // Template
+        var template = ' <div class="flexbox"> \
+                          <button id="'+id+'" type="button" class="close flexboxmargin" aria-label="Close">\
+                          <span aria-hidden="true">&times;</span>\
+                          </button> \
+                          <textfichier id="text'+id+'" class="flexboxsmall flexboxmargin" >'+displayName+'</textfichier> \
+                          <div class="progress flexboxbig flexboxmargin flexboxprogress"> \
+                              <div id="progress'+id+'" class="progress-bar progress-bar-striped active progress-bar-'+colored+' flexboxprogress" role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100" style="width:'+percent+'%">'+percent+'%</div> \
+                          </div>\
+                          <p id="status'+id+'" class="btn btn-sm btn-'+colored+' flexboxmargin" data-toggle="popover" data-content="'+status+'">'+status+'</p> \
+                          <a id="download'+id+'" class="btn btn-default btndl flexboxmargin" role="button" href="download/'+name+'" download '+disabled_button+'>Télécharger</a> \
+                        </div>';
         $(template).appendTo('#monitoring');
       }
 
