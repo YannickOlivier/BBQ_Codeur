@@ -6,7 +6,7 @@ jQuery(function ($) {
     // chaque chargement
     socket.emit('getProfile');
     socket.emit('getMonitoring');
-    
+
     //On change le nom du profile dans la liste
     console.log('Nouveau profile');
 
@@ -129,7 +129,7 @@ jQuery(function ($) {
               colored = 'danger';
             break;
           case 'DONE':
-              colored = 'info';
+              colored = 'primary';
             break;
           case 'STOP':
               colored = 'danger';
@@ -139,9 +139,9 @@ jQuery(function ($) {
           // Test si téléchargement possible
           var disabled_button = '';
             if (monitoring[i].status == 'ERROR' || monitoring[i].status == 'STOP') {
-              disabled_button = '';
+              disabled_button = 'disabled'
             } else {
-              disabled_button = 'href';
+              disabled_button = '';
             }
 
         // Template
@@ -154,7 +154,7 @@ jQuery(function ($) {
                               <div id="progress'+id+'" class="progress-bar progress-bar-striped active progress-bar-'+colored+' flexboxprogress" role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100" style="width:'+percent+'%">'+percent+'%</div> \
                           </div>\
                           <p id="status'+id+'" class="btn btn-sm btn-'+colored+' flexboxmargin" data-toggle="popover" data-content="'+status+'">'+status+'</p> \
-                          <a id="download'+id+'" class="btn btn-default btndl flexboxmargin" role="button" '+disabled_button+'="download/'+name+'" download>Télécharger</a> \
+                          <a id="download'+id+'" class="btn btn-default btndl flexboxmargin '+disabled_button+'" role="button" href="download/'+name+'" download>Télécharger</a> \
                         </div>';
         $(template).appendTo('#monitoring');
       }
