@@ -152,14 +152,13 @@ jQuery(function ($) {
                         </div>';
         $(template).appendTo('#monitoring');
       }
+    });
 
-      $('.close').click(function(e){
-        socket.emit('job', {
-          type: 'delete',
-          jobID: e.currentTarget.id
-        });
+    $('.close').click(function(e){
+      socket.emit('job', {
+        type: 'delete',
+        jobID: e.currentTarget.id
       });
-
     });
 
 });
