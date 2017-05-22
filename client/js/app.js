@@ -111,17 +111,37 @@ jQuery(function ($) {
         var percent = monitoring[i].percent;
         var status = monitoring[i].status;
         var displayName = monitoring[i].displayName;
+        var colored = '';
+
         var template = ' <div class="flexbox"> \
                           <button id="'+id+'" type="button" class="close flexboxmargin" aria-label="Close">\
                           <span aria-hidden="true">&times;</span>\
                           </button> \
                           <textfichier id="text'+id+'" class="flexboxsmall flexboxmargin" >'+displayName+'</textfichier> \
                           <div class="progress flexboxbig flexboxmargin flexboxprogress"> \
-                              <div id="progress'+id+'" class="progress-bar progress-bar-striped active progress-bar-success flexboxprogress" role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100" style="width:'+percent+'%">'+percent+'%</div> \
+                              <div id="progress'+id+'" class="progress-bar progress-bar-striped active progress-bar-'+colored+' flexboxprogress" role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100" style="width:'+percent+'%">'+percent+'%</div> \
                           </div>\
-                          <p id="status'+id+'" class="btn btn-sm btn-success flexboxmargin" data-toggle="popover" ">'+status+'</p> \
+                          <p id="status'+id+'" class="btn btn-sm btn-'+colored+' flexboxmargin" data-toggle="popover" data-content="'+status+'">'+status+'</p> \
                           <button id="download'+id+'" type="button" class="btn btn-sm btndl flexboxmargin">Télécharger</button> \
                         </div>';
+        switch(monitoring[i].status){
+          case 'Transcoding':
+              colored = 'success';
+            break;
+          case 'Uploading':
+              colored = 'warning';
+            break;
+          case 'ERROR':
+              colored = 'danger';
+            break;
+          case 'DONE':
+              colored = 'info';
+            break;
+          case 'STOP':
+              colored = 'danger';
+            break;
+        }
+        
         $(template).appendTo('#monitoring');
       }
 
