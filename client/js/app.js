@@ -129,15 +129,14 @@ jQuery(function ($) {
               colored = 'danger';
             break;
         }
-        
+
           // Test si téléchargement possible
           var disabled_button = '';
-          var href = 'href="download/';
-            if (monitoring[1].status == ERROR || monitoring[1].satus == STOP) {
-          disabled_button = 'disabled';
-          } else {
-          disabled_button = '';
-         }
+            if (monitoring[i].status == 'ERROR' || monitoring[i].status == 'STOP') {
+              disabled_button = '';
+            } else {
+              disabled_button = 'href';
+            }
 
         // Template
         var template = ' <div class="flexbox"> \
@@ -149,7 +148,7 @@ jQuery(function ($) {
                               <div id="progress'+id+'" class="progress-bar progress-bar-striped active progress-bar-'+colored+' flexboxprogress" role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100" style="width:'+percent+'%">'+percent+'%</div> \
                           </div>\
                           <p id="status'+id+'" class="btn btn-sm btn-'+colored+' flexboxmargin" data-toggle="popover" data-content="'+status+'">'+status+'</p> \
-                          <a id="download'+id+'" class="btn btn-default btndl flexboxmargin" role="button" href="download/'+name+'" download '+disabled_button+'>Télécharger</a> \
+                          <a id="download'+id+'" class="btn btn-default btndl flexboxmargin" role="button" '+disabled_button+'="download/'+name+'" download>Télécharger</a> \
                         </div>';
         $(template).appendTo('#monitoring');
       }
