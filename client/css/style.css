@@ -16,6 +16,10 @@ textfichier {
   margin-bottom: 5px;
 }
 
+.btn-margin {
+  margin-top: 15px;
+}
+
 .flexboxmargin {
   margin-left: 2px;
   margin-right: 2px;

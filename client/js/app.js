@@ -102,7 +102,7 @@ jQuery(function ($) {
                           </button> \
                           <textfichier id="text'+id+'" class="flexboxsmall flexboxmargin" >'+name+'</textfichier> \
                           <div class="progress flexboxbig flexboxmargin flexboxprogress"> \
-                              <div id="progress'+id+'" class="progress-bar progress-bar-striped active progress-bar-success flexboxprogress" role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100" style="width:'+percent+'%"></div> \
+                              <div id="progress'+id+'" class="progress-bar progress-bar-striped active progress-bar-success flexboxprogress" role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100" style="width:'+percent+'%">'+percent+'%</div> \
                           </div>\
                           <p id="status'+id+'" class="btn btn-sm btn-success flexboxmargin" data-toggle="popover" ">'+status+'</p> \
                           <button id="download'+id+'" type="button" class="btn btn-sm btndl flexboxmargin">Télécharger</button> \
