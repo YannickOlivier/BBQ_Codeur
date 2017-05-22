@@ -274,7 +274,7 @@ var updateMonitoring = function(){
 
     switch(jobs[i].status){
       case 'Transcoding':
-        monitoring[i].percent = jobs[i].monitoring;
+        monitoring[i].percent = jobs[i].percent;
         monitoring[i].status = 'Transcode';
       break;
       case 'Uploading':
@@ -376,7 +376,7 @@ var BBQJob = function (jobID, parameters) {
                           .audioCodec(profile.aCodec == 'AAC' ? 'aac': 'pcm_s16le')
                           .on('progress', function(progress) {
                             LogInfo('Processing: ' + progress.percent + ' % done');
-                            self.percent = ''+progress.percent;
+                            self.percent = Math.round(progress.percent);
                           })
                           .save(path.join(__dirname, '../common/output',parameters.name))  
                           .on('end', function() {
