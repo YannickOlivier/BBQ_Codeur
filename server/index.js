@@ -117,8 +117,6 @@ app.post('/upload', (req, res) => {
   form.on('file', function(field, file) {
     fs.rename(file.path, path.join(form.uploadDir, file.name));
     parameters.path = path.join(form.uploadDir, file.name);
-    parameters.name = file.name;
-    jobs[jobID].name = file.name;
   });
 
   form.on('fileBegin', function(name, file) {
@@ -131,11 +129,19 @@ app.post('/upload', (req, res) => {
 
   //On récupere le nom du profile
   form.on('field', function(name, value) {  
-    if(name == 'profile'){
-      parameters.profile = value;
-      jobs[jobID].res = res;
-      LogInfo('Profile name receveid: '+value);
+    switch(value){
+      case 'profile':
+        parameters.profile = value;
+        jobs[jobID].res = res;
+        LogInfo('Profile name receveid: '+value);
+      break;
+      case 'name':
+        parameters.name = file.name;
+        jobs[jobID].name = file.name;
+        LogWarning('name: '+jobs[jobID].name);
+      break;
     }
+
   });
 
   // log any errors that occur
@@ -219,6 +225,11 @@ io.sockets.on('connection', (socket) => {
     socket.emit('monitoring', monitoring);
   });
 
+  socket.on('clearMonitoring', function(request){
+    monitoring = {};
+    updateMonitoring();
+  });
+
   LogWorkflow('New user connected');
 });
 
@@ -269,7 +280,9 @@ var updateMonitoring = function(){
       break;
     }
     if(monitoring[i].name == 'Waiting ...' && monitoring[i].status == 'STOP')
-      monitoring[i].name = 'Aborded';
+      monitoring[i].name = 'Aborded';    
+    if(monitoring[i].name == 'Waiting ...' && monitoring[i].name != jobs[i].name)
+      monitoring[i].name = jobs[i].name;
   }
   fs.writeFile(path.join(__dirname, '../common/tmp/monitoring/monitoring.json'), JSON.stringify(monitoring), (err) =>{
     if(err)
