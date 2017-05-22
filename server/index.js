@@ -98,68 +98,68 @@ app.get('/download/:fileName', (req, res) => {
   }
 });
 app.post('/upload', (req, res) => {
-  var jobID = crypto.randomBytes(32).toString('hex');
-  jobs[jobID] = {
-    status: 'Uploading',
-    name: 'Waiting ...'
-  };
-  // create an incoming form object
-  var form = new formidable.IncomingForm();
-  var parameters = {};
-  // specify that we want to allow the user to upload multiple files in a single request
-  form.multiples = true;
+  try{
+    var jobID = crypto.randomBytes(32).toString('hex');
+    jobs[jobID] = {
+      status: 'Uploading',
+      name: 'Waiting ...'
+    };
+    // create an incoming form object
+    var form = new formidable.IncomingForm();
+    var parameters = {};
+    // specify that we want to allow the user to upload multiple files in a single request
+    form.multiples = true;
 
-  // store all uploads in the /uploads directory
-  form.uploadDir = path.join(__dirname, '../uploads');
+    // store all uploads in the /uploads directory
+    form.uploadDir = path.join(__dirname, '../uploads');
 
-  // every time a file has been uploaded successfully,
-  // rename it to it's orignal name
-  form.on('file', function(field, file) {
-    fs.rename(file.path, path.join(form.uploadDir, file.name));
-    parameters.path = path.join(form.uploadDir, file.name);
-  });
+    // every time a file has been uploaded successfully,
+    // rename it to it's orignal name
+    form.on('file', function(field, file) {
+      fs.rename(file.path, path.join(form.uploadDir, file.name));
+      parameters.path = path.join(form.uploadDir, file.name);
+    });
 
-  form.on('fileBegin', function(name, file) {
-    LogWorkflow('Starting file upload: '+name);
-  });
+    form.on('fileBegin', function(name, file) {
+      LogWorkflow('Starting file upload: '+name);
+    });
 
-  form.on('progress', function(bytesReceived, bytesExpected) {
-    jobs[jobID].percent = Math.round((bytesReceived/bytesExpected)*100);
-  });
+    form.on('progress', function(bytesReceived, bytesExpected) {
+      jobs[jobID].percent = Math.round((bytesReceived/bytesExpected)*100);
+    });
 
-  //On récupere le nom du profile
-  form.on('field', function(name, value) {  
-    switch(value){
-      case 'profile':
-        parameters.profile = value;
-        jobs[jobID].res = res;
-        LogInfo('Profile name receveid: '+value);
-      break;
-      case 'name':
-        parameters.name = file.name;
-        jobs[jobID].name = file.name;
-        LogWarning('name: '+jobs[jobID].name);
-      break;
-    }
+    //On récupere le nom du profile
+    form.on('field', function(name, value) {  
+      switch(name){
+        case 'profile':
+          parameters.profile = value;
+          jobs[jobID].res = res;
+        break;
+        case 'name':
+          parameters.name = value;
+          jobs[jobID].name = value;
+        break;
+      }
 
-  });
+    });
 
-  // log any errors that occur
-  form.on('error', function(err) {
-    LogError('An error has occured: ' + err);
-    cancelJob(jobID);
-  });
+    // log any errors that occur
+    form.on('error', function(err) {
+      LogError('An error has occured: ' + err);
+      cancelWFJob(jobID);
+    });
 
-  // once all the files have been uploaded, send a response to the client
-  form.on('end', function() {
-    res.end('success');
-    jobs[jobID] = new BBQJob(jobID, parameters);
-  });
+    // once all the files have been uploaded, send a response to the client
+    form.on('end', function() {
+      res.end('success');
+      jobs[jobID] = new BBQJob(jobID, parameters);
+    });
 
-  // parse the incoming request containing the form data
-  form.parse(req);
+    // parse the incoming request containing the form data
+    form.parse(req);
 
-  return;
+    return;
+  } catch(e) {LogError('Error uploading file on line '+e.lineNumber+' : '+e.message); }
 });
 
 io.sockets.on('connection', (socket) => {
@@ -170,7 +170,7 @@ io.sockets.on('connection', (socket) => {
       break;
 
       case 'delete':
-        cancelJob(job.jobID);
+        cancelWFJob(job.jobID);
       break;
     }
     return;
@@ -257,6 +257,7 @@ var updateMonitoring = function(){
           id: jobs[i].id
         };
     }
+    LogWarning(jobs[i].name)
     switch(jobs[i].status){
       case 'Transcoding':
         monitoring[i].percent = jobs[i].monitoring;
@@ -322,7 +323,7 @@ var newWFJob = function (parameters) {
   return;
 };
 
-var cancelJob = function(id){
+var cancelWFJob = function(id){
   if(jobs[id]){
     if(jobs[id].status == 'Upload')
       jobs[id].res.end('Abord');
@@ -334,7 +335,7 @@ var cancelJob = function(id){
     jobs[id].percent = 100;
     jobs[id].status = 'STOP';
   }
-  LogWarning('name '+jobs[id].name)
+  LogWarning('JOB ABORDED '+jobs[id].name);
   
   updateMonitoring();
 };
