@@ -171,6 +171,7 @@ io.sockets.on('connection', (socket) => {
       break;
 
       case 'delete':
+        LogWarning(JSON.stringify(job));
         cancelWFJob(job.jobID);
       break;
     }

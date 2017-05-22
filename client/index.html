@@ -37,14 +37,12 @@
                     jQuery(function ($) {
                         $('#inputbtn').click(function(e){
                             e.preventDefault();
-                            console.log('in')
-                            $('#inputPage').show();
-                            $('#monitoring').hide();
+                            $('#inputPage').show(); 
+                            $('#monitoringTitle').hide();
                         })
                         $('#outputbtn').click(function(e){
                             e.preventDefault();
-                            console.log('out')
-                            $('#monitoring').show();
+                            $('#monitoringTitle').show();
                             $('#inputPage').hide();
                         })
                     });
@@ -107,6 +105,8 @@
               <div class="corpsBottom" id="inputPage">
                 <h3> Interface de transcodage </h3>
                 <br>
+
+
                 <div class"form-group">
                     <label for="InputFile">Choix des fichiers à transcoder :</label>
                     <input type="file" name="uploads[]"  id="inputFiles">
@@ -124,7 +124,20 @@
                 <button id="Transcode" type="submit" class"Transcode btn btn-default">Transcode</button>
               </div>
       </div>
-      <div class="corpsBottom" id="monitoring" style="display:none">       </div>
+    <div id="monitoringTitle" class="col-sd-12 col-md-12" style="display:none">
+    <div class="corpsTop">
+        <div class="row">
+            <div class="col-sd-9 col-md-9">
+                <h3> Etat des transcodes : </h3>
+            </div>
+            <div class="col-sd-3 col-md-3">
+                <button id="clearMonitoring" type="button" class="btn btn-warning btn-margin">Clear</button>
+            </div>
+        </div>
+    </div>
+    <div class="corpsBottom" id="monitoring" style="display:none"></div>
+
+    </div>
       <div class="footer">
           <h5> Réalisé par Julien et Yannick : projet de fin de première année - ENSEA/INA </h5>
       </div>
