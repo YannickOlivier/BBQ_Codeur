@@ -257,7 +257,7 @@ var updateMonitoring = function(){
           id: jobs[i].id
         };
     }
-    LogWarning(jobs[i].name)
+
     switch(jobs[i].status){
       case 'Transcoding':
         monitoring[i].percent = jobs[i].monitoring;
