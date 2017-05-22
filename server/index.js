@@ -344,7 +344,9 @@ var cancelWFJob = function(id){
     if(jobs[id].status == 'Upload')
       jobs[id].res.end('Abord');
     if(jobs[id].status == 'Transcode')
-      jobs[id].cancelJob();
+      jobs[id].ffmpegProcess.kill();
+      jobs[id].status = 'STOP';
+      LogWorkflow('Job '+ jobID + 'Killed');
     if(jobs[id].name == 'Waiting ...')
       jobs[id].name = 'Aborded';
 
@@ -363,11 +365,6 @@ var BBQJob = function (jobID, parameters) {
     self.percent = '0';
     self.name = parameters.name;
     self.status = 'Transcoding';
-    self.cancelJob = function(){
-      self.ffmpegProcess.kill();
-      self.status = 'STOP';
-      LogWorkflow('Job '+ jobID + 'Killed');
-    };
     var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile')))[parameters.profile];
     self.profile = profile;
     self.ffmpegProcess = ffmpeg(parameters.path)

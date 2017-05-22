@@ -6,13 +6,11 @@ jQuery(function ($) {
     // chaque chargement
     socket.emit('getProfile');
     socket.emit('getMonitoring');
-    socket.emit('test', {
-      test: 'start'
-    });
+    
     //On change le nom du profile dans la liste
     console.log('Nouveau profile');
 
-    $('#listProfil').change(updateProfile);
+    $(document).on('change', '#listProfil', updateProfile);
 
     function updateProfile(){
         var profilName = $('#listProfil').val();
@@ -35,13 +33,13 @@ jQuery(function ($) {
   //  $('#listProfil').change(function())
 
     // On set VAL '' à l'ID NameProfil
-    $('#NewProfil').click(function(el){
+    $(document).on('click', '#NewProfil', function(el){
         console.log('click');
         $('#NameProfil').val('');
     });
 
     // On emit via Socket des objects, après click sur updateProfile
-    $('#SaveProfil').click(function() {
+    $(document).on('click', '#SaveProfil', function() {
         console.log('Requête de modification du profil')
         socket.emit('updateProfile', {
           name:$('#NameProfil').val(),
@@ -54,7 +52,7 @@ jQuery(function ($) {
     });
 
     // Suppression d'un profil
-    $('#DeleteProfil').click(function() {
+    $(document).on('click', '#DeleteProfil', function() {
         console.log('Requête de suppression du profil')
         socket.emit('deleteProfile', {
           name:$('#NameProfil').val()
@@ -62,7 +60,7 @@ jQuery(function ($) {
     });
 
     // Clear monitoring
-    $('#clearMonitoring').click(function() {
+    $(document).on('click', '#clearMonitoring', function() {
         console.log('Suppression du monitoring');
         socket.emit('clearMonitoring', {
           clear: true
@@ -71,7 +69,7 @@ jQuery(function ($) {
 
 
     // Shutdown du serveur
-    $('#Shutdown').click(function() {
+    $(document).on('click', '#Shutdown', function() {
         console.log('Shutdown du serveur');
         socket.emit('test', {
           test: 'shutdown'
@@ -79,6 +77,14 @@ jQuery(function ($) {
         socket.emit('shutdown', {
           shutdown: true
         });
+    });
+
+    $(document).on('click', '.close', function(e){
+      console.log('Kill send');
+      socket.emit('job', {
+        type: 'delete',
+        jobID: e.currentTarget.id
+      });
     });
 
     // Arrêt du serveur
@@ -153,14 +159,6 @@ jQuery(function ($) {
         $(template).appendTo('#monitoring');
       }
     });
-
-    $('.close').click(function(e){
-      socket.emit('job', {
-        type: 'delete',
-        jobID: e.currentTarget.id
-      });
-    });
-
 });
 
 
