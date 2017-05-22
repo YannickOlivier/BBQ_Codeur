@@ -275,6 +275,7 @@ var updateMonitoring = function(){
     if(err)
       LogError('Writing monitoring file '+err);
   });
+
   io.local.emit('monitoring', monitoring);
 
 };

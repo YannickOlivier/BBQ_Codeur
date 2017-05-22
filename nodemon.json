@@ -1,0 +1,4 @@
+{
+  "verbose": false,
+  "ignore": ["common/tmp/monitoring/monitoring.json", "*.log", "*.json", "*.profile"]
+}
