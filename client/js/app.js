@@ -62,18 +62,20 @@ jQuery(function ($) {
 
     // Clear monitoring
     $('#clearMonitoring').click(function() {
-        console.log('Suppression du monitoring')
+        console.log('Suppression du monitoring');
         socket.emit('clearMonitoring', {
+          clear: true
         });
     });
 
 
     // Shutdown du serveur
-        $('#Shutdown').click(function() {
-            console.log('Shutdown du serveur')
-            socket.emit('shutdown', {
-            });
+    $('#Shutdown').click(function() {
+        console.log('Shutdown du serveur');
+        socket.emit('shutdown', {
+          shutdown: true
         });
+    });
 
         // Arrêt du serveur
         socket.on('shutdown', function(profile) {
