@@ -153,6 +153,7 @@ app.post('/upload', (req, res) => {
     form.on('end', function() {
       res.end('success');
       jobs[jobID] = new BBQJob(jobID, parameters);
+      console.log(jobs[jobID].name)
     });
 
     // parse the incoming request containing the form data
@@ -201,7 +202,7 @@ io.sockets.on('connection', (socket) => {
     profile[request.name] = request;
     tempString = JSON.stringify(profile);
     fs.writeFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), tempString);
-    socket.broadcastemit('profile', profile);
+    socket.broadcast('profile', profile);
     return;
   });
 
@@ -216,9 +217,21 @@ io.sockets.on('connection', (socket) => {
   });
 
   socket.on('shutdown', (request) =>{
-    LogInfo('Shutdown request !!');
-    socket.broadcast('shutdown', {message: 'Server is shutting down !'} );
-    process.exit(0);
+    LogWarning('Shutdown request !!');
+    for(var i in jobs){
+      cancelWFJob(i);
+    }
+    updateMonitoring();
+    setTimeout(function () {
+      io.local.emit('shutdown', {message: 'Server is shutting down !'} );
+      io.server.close();
+      server.close();
+      LogWarning('Shutting down !!');
+      process.exit(0);
+    }, 1000);
+  });
+  socket.on('test', (request) => {
+    LogWarning('TEST: '+request.test);
   });
 
   socket.on('getMonitoring', (request) => {
@@ -347,6 +360,7 @@ var BBQJob = function (jobID, parameters) {
   var self = this;
   try{
     self.id = jobID;
+    self.percent = '0';
     self.name = parameters.name;
     self.status = 'Transcoding';
     self.cancelJob = function(){
@@ -361,8 +375,8 @@ var BBQJob = function (jobID, parameters) {
                           .size(profile.Format)
                           .audioCodec(profile.aCodec == 'AAC' ? 'aac': 'pcm_s16le')
                           .on('progress', function(progress) {
-                            //LogInfo('Processing: ' + progress.percent + ' % done');
-                            self.percent = progress.percent;
+                            LogInfo('Processing: ' + progress.percent + ' % done');
+                            self.percent = ''+progress.percent;
                           })
                           .save(path.join(__dirname, '../common/output',parameters.name))  
                           .on('end', function() {

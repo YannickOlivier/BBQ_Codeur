@@ -3,11 +3,12 @@ var bbq = {};
 jQuery(function ($) {
 
     var socket = io('http://localhost:8080');
-
     // chaque chargement
     socket.emit('getProfile');
     socket.emit('getMonitoring');
-
+    socket.emit('test', {
+      test: 'start'
+    });
     //On change le nom du profile dans la liste
     console.log('Nouveau profile');
 
@@ -72,16 +73,19 @@ jQuery(function ($) {
     // Shutdown du serveur
     $('#Shutdown').click(function() {
         console.log('Shutdown du serveur');
+        socket.emit('test', {
+          test: 'shutdown'
+        });
         socket.emit('shutdown', {
           shutdown: true
         });
     });
 
-        // Arrêt du serveur
-        socket.on('shutdown', function(profile) {
-          console.log('Shutdown coté serveur');
-          confirm("Le serveur vient de s'arrêter");
-        });
+    // Arrêt du serveur
+    socket.on('shutdown', function(profile) {
+      console.log('Shutdown coté serveur');
+      confirm("Le serveur vient de s'arrêter");
+    });
 
     // Mise à jour des profils
     socket.on('profile', function(profile) {
