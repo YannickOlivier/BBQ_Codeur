@@ -5,14 +5,13 @@
     <title>BBQ Coder - INA</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="public/css/bootstrap.min.css"></link>
     <link rel="stylesheet" href="public/css/style.css">
     <link rel="stylesheet" href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  
 
     <script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.3.0/dropzone-amd-module.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
     <script src="public/js/app.js"></script>
     <script src="public/js/upload.js"></script>
@@ -33,17 +32,33 @@
                           </span>Encoding</a>
                       </h4>
                   </div>
+                  <script type="text/javascript">  
+                    jQuery(function ($) {
+                        $('#inputbtn').click(function(e){
+                            e.preventDefault();
+                            console.log('in')
+                            $('#inputPage').show();
+                            $('#monitoring').hide();
+                        })
+                        $('#outputbtn').click(function(e){
+                            e.preventDefault();
+                            console.log('out')
+                            $('#monitoring').show();
+                            $('#inputPage').hide();
+                        })
+                    });
+                  </script>
                   <div id="collapseOne" class="panel-collapse collapse in">
                       <div class="panel-body">
                           <table class="table">
                               <tr>
                                   <td>
-                                      <span class="glyphicon glyphicon-upload text-primary"></span><a href="index.html">Inputs</a>
+                                      <span class="glyphicon glyphicon-upload text-primary"></span><a id="inputbtn" href="#">Inputs</a>
                                   </td>
                               </tr>
                               <tr>
                                   <td>
-                                      <span class="glyphicon glyphicon-download text-success"></span><a href="output.html">Outputs</a>
+                                      <span class="glyphicon glyphicon-download text-success"></span><a id="outputbtn" href="#">Outputs</a>
                                   </td>
                               </tr>
                               <tr>
@@ -88,21 +103,7 @@
           </div>
           </div>
           <div class="col-sm-9 col-md-9">
-              <div class="corpsTop">
-                          <h3> Choix du mode de l'utilisateur : </h3>
-                          <input id="toggle-trigger" type="checkbox" checked data-toggle="toggle" data-on="User Mode" data-off="Expert Mode" data-onstyle="success" data-offstyle="danger">
-                          <button class="btn btn-success" onclick="toggleOn()">User Mode</button>
-                          <button class="btn btn-danger" onclick="toggleOff()">Expert Mode</button>
-                          <script>
-                          function toggleOn() {
-                            $('#toggle-trigger').bootstrapToggle('on')
-                          }
-                          function toggleOff() {
-                            $('#toggle-trigger').bootstrapToggle('off')
-                          }
-                          </script>
-            	</div>
-              <div class="corpsBottom">
+              <div class="corpsBottom" id="inputPage">
                 <h3> Interface de transcodage </h3>
                 <br>
                 <div class"form-group">
@@ -122,6 +123,7 @@
                 <button id="Transcode" type="submit" class"Transcode btn btn-default">Transcode</button>
               </div>
       </div>
+      <div class="corpsBottom" id="monitoring" style="display:none">       </div>
       <div class="footer">
           <h5> Réalisé par Julien et Yannick : projet de fin de première année - ENSEA/INA </h5>
       </div>

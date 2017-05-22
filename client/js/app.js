@@ -6,6 +6,7 @@ jQuery(function ($) {
 
     // chaque chargement
     socket.emit('getProfile');
+    socket.emit('getMonitoring');
 
     //On change le nom du profile dans la liste
     console.log('Nouveau profile');
@@ -87,20 +88,18 @@ jQuery(function ($) {
       updateProfileNBR();
     });
 
-    $(document).ready(function(){
-    $('[data-toggle="popover"]').popover({
-        placement : 'top'
-    });
 
     socket.on('monitoring', function(monitoring){
-      console.log(monitoring)
+      $('#monitoring').empty();
       for(var i in monitoring){
         var name = monitoring[i].name;
         var id = i;
         var percent = monitoring[i].percent;
         var status = monitoring[i].status;
         var template = ' <div class="flexbox"> \
-                          <button id="close_'+id+'" type="button" class="close flexboxmargin" aria-label="Close"></button> \
+                          <button id="'+id+'" type="button" class="close flexboxmargin" aria-label="Close">\
+                          <span aria-hidden="true">&times;</span>\
+                          </button> \
                           <textfichier id="text'+id+'" class="flexboxsmall flexboxmargin" >'+name+'</textfichier> \
                           <div class="progress flexboxbig flexboxmargin flexboxprogress"> \
                               <div id="progress'+id+'" class="progress-bar progress-bar-striped active progress-bar-success flexboxprogress" role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100" style="width:'+percent+'%"></div> \
@@ -108,16 +107,17 @@ jQuery(function ($) {
                           <p id="status'+id+'" class="btn btn-sm btn-success flexboxmargin" data-toggle="popover" ">'+status+'</p> \
                           <button id="download'+id+'" type="button" class="btn btn-sm btndl flexboxmargin">Télécharger</button> \
                         </div>';
-        $('#monitoring').empty();
         $(template).appendTo('#monitoring');
       }
 
-
+      $('.close').click(function(e){
+        socket.emit('job', {
+          type: 'delete',
+          jobID: e.currentTarget.id
+        });
+      });
 
     });
-
-
-});
 
 });
 

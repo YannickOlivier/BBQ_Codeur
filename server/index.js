@@ -100,7 +100,8 @@ app.get('/download/:fileName', (req, res) => {
 app.post('/upload', (req, res) => {
   var jobID = crypto.randomBytes(32).toString('hex');
   jobs[jobID] = {
-    status: 'Uploading'
+    status: 'Uploading',
+    name: 'Waiting ...'
   };
   // create an incoming form object
   var form = new formidable.IncomingForm();
@@ -119,6 +120,7 @@ app.post('/upload', (req, res) => {
     parameters.name = file.name;
     jobs[jobID].name = file.name;
   });
+
   form.on('fileBegin', function(name, file) {
     LogWorkflow('Starting file upload: '+name);
   });
@@ -126,16 +128,20 @@ app.post('/upload', (req, res) => {
   form.on('progress', function(bytesReceived, bytesExpected) {
     jobs[jobID].percent = Math.round((bytesReceived/bytesExpected)*100);
   });
+
   //On récupere le nom du profile
   form.on('field', function(name, value) {  
     if(name == 'profile'){
       parameters.profile = value;
+      jobs[jobID].res = res;
       LogInfo('Profile name receveid: '+value);
     }
   });
+
   // log any errors that occur
   form.on('error', function(err) {
-    LogError('An error has occured: \n' + err);
+    LogError('An error has occured: ' + err);
+    cancelJob(jobID);
   });
 
   // once all the files have been uploaded, send a response to the client
@@ -158,7 +164,7 @@ io.sockets.on('connection', (socket) => {
       break;
 
       case 'delete':
-        deleteJob(job.jobID);
+        cancelJob(job.jobID);
       break;
     }
     return;
@@ -209,6 +215,10 @@ io.sockets.on('connection', (socket) => {
     process.exit(0);
   });
 
+  socket.on('getMonitoring', (request) => {
+    socket.emit('monitoring', monitoring);
+  });
+
   LogWorkflow('New user connected');
 });
 
@@ -216,7 +226,19 @@ io.sockets.on('connection', (socket) => {
 
 //Routines
 try{
+  try{
+    fs.readFile(path.join(__dirname, '../common/tmp/monitoring/monitoring.json'), (err, data) =>{
+      if(err)
+        LogError('Read monitoring file');
+      else
+        monitoring = JSON.parse(data);
+    });
+  } catch(e) {}
 var monitoringRoutine = new CronJob('* * * * * *', function() {  //Routine toutes les secondes
+  updateMonitoring();
+}, null, true); } catch(e){ LogError('On routine '+e.message); }
+
+var updateMonitoring = function(){
   for(var i in jobs){
     if(!monitoring[i]){
         monitoring[i] = {
@@ -241,12 +263,21 @@ var monitoringRoutine = new CronJob('* * * * * *', function() {  //Routine toute
         monitoring[i].percent = 100;
         monitoring[i].status = 'DONE';
       break;
+      case 'STOP':
+        monitoring[i].percent = 100;
+        monitoring[i].status = 'STOP';
+      break;
     }
+    if(monitoring[i].name == 'Waiting ...' && monitoring[i].status == 'STOP')
+      monitoring[i].name = 'Aborded';
   }
+  fs.writeFile(path.join(__dirname, '../common/tmp/monitoring/monitoring.json'), JSON.stringify(monitoring), (err) =>{
+    if(err)
+      LogError('Writing monitoring file '+err);
+  });
   io.local.emit('monitoring', monitoring);
 
-}, null, true); } catch(e){ LogError('On routine '+e.message); }
-
+};
 
 //Job Section
 /*watcher.watch(path.join(__dirname, '../common/tmp')); //WatchFolder !!! A metre dans une fonction pour gestion depuis interface
@@ -277,6 +308,23 @@ var newWFJob = function (parameters) {
   return;
 };
 
+var cancelJob = function(id){
+  if(jobs[id]){
+    if(jobs[id].status == 'Upload')
+      jobs[id].res.end('Abord');
+    if(jobs[id].status == 'Transcode')
+      jobs[id].cancelJob();
+    if(jobs[id].name == 'Waiting ...')
+      jobs[id].name = 'Aborded';
+
+    jobs[id].percent = 100;
+    jobs[id].status = 'STOP';
+  }
+  LogWarning('name '+jobs[id].name)
+  
+  updateMonitoring();
+};
+
 var BBQJob = function (jobID, parameters) {
   var self = this;
   try{
@@ -285,6 +333,7 @@ var BBQJob = function (jobID, parameters) {
     self.status = 'Transcoding';
     self.cancelJob = function(){
       self.ffmpegProcess.kill();
+      self.status = 'STOP';
       LogWorkflow('Job '+ jobID + 'Killed');
     };
     var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile')))[parameters.profile];
@@ -327,3 +376,5 @@ process.on('uncaughtException', (err) =>{
   LogError('FATAL ERROR!!: '+err);
 	//process.exit(1);
 });
+
+LogWarning('Sever started');
