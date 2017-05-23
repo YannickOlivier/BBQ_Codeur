@@ -80,7 +80,7 @@ jQuery(function ($) {
     });
 
     $(document).on('click', '.close', function(e){
-      console.log('Kill send');
+      console.log('Kill send '+e.currentTarget.id);
       socket.emit('job', {
         type: 'delete',
         jobID: e.currentTarget.id

@@ -98,69 +98,8 @@ app.get('/download/:fileName', (req, res) => {
   }
 });
 app.post('/upload', (req, res) => {
-  try{
     var jobID = crypto.randomBytes(32).toString('hex');
-    jobs[jobID] = {
-      status: 'Uploading',
-      name: 'Waiting ...'
-    };
-    // create an incoming form object
-    var form = new formidable.IncomingForm();
-    var parameters = {};
-    // specify that we want to allow the user to upload multiple files in a single request
-    form.multiples = true;
-
-    // store all uploads in the /uploads directory
-    form.uploadDir = path.join(__dirname, '../uploads');
-
-    // every time a file has been uploaded successfully,
-    // rename it to it's orignal name
-    form.on('file', function(field, file) {
-      fs.rename(file.path, path.join(form.uploadDir, file.name));
-      parameters.path = path.join(form.uploadDir, file.name);
-    });
-
-    form.on('fileBegin', function(name, file) {
-      LogWorkflow('Starting file upload: '+name);
-    });
-
-    form.on('progress', function(bytesReceived, bytesExpected) {
-      jobs[jobID].percent = Math.round((bytesReceived/bytesExpected)*100);
-    });
-
-    //On récupere le nom du profile
-    form.on('field', function(name, value) {  
-      switch(name){
-        case 'profile':
-          parameters.profile = value;
-          jobs[jobID].res = res;
-        break;
-        case 'name':
-          parameters.name = value;
-          jobs[jobID].name = value;
-        break;
-      }
-
-    });
-
-    // log any errors that occur
-    form.on('error', function(err) {
-      LogError('An error has occured: ' + err);
-      cancelWFJob(jobID);
-    });
-
-    // once all the files have been uploaded, send a response to the client
-    form.on('end', function() {
-      res.end('success');
-      jobs[jobID] = new BBQJob(jobID, parameters);
-      console.log(jobs[jobID].name)
-    });
-
-    // parse the incoming request containing the form data
-    form.parse(req);
-
-    return;
-  } catch(e) {LogError('Error uploading file on line '+e.lineNumber+' : '+e.message); }
+    jobs[jobID] = new upload(req, res, jobID);
 });
 
 io.sockets.on('connection', (socket) => {
@@ -171,7 +110,6 @@ io.sockets.on('connection', (socket) => {
       break;
 
       case 'delete':
-        LogWarning(JSON.stringify(job));
         cancelWFJob(job.jobID);
       break;
     }
@@ -247,7 +185,75 @@ io.sockets.on('connection', (socket) => {
   LogWorkflow('New user connected');
 });
 
+var upload = function(req, res, jobID){
+  var self = this;
+  try{
+    self.id = jobID;
+    self.name ='Waiting ...';
+    self.status = 'Upload';
+    self.percent = 0;
+    self.isUploadCancel = false;
+    self.stopUpload = function(){
+      res.end('abord');
+      self.isUploadCancel = true;
+    };
+    // create an incoming form object
+    var form = new formidable.IncomingForm();
+    var parameters = {};
+    // specify that we want to allow the user to upload multiple files in a single request
+    form.multiples = true;
 
+    // store all uploads in the /uploads directory
+    form.uploadDir = path.join(__dirname, '../uploads');
+
+    // every time a file has been uploaded successfully,
+    // rename it to it's orignal name
+    form.on('file', function(field, file) {
+      fs.rename(file.path, path.join(form.uploadDir, file.name));
+      parameters.path = path.join(form.uploadDir, file.name);
+    });
+
+    form.on('fileBegin', function(name, file) {
+      LogWorkflow('Starting file upload: '+name);
+    });
+
+    form.on('progress', function(bytesReceived, bytesExpected) {
+      self.percent = Math.round((bytesReceived/bytesExpected)*100);
+    });
+
+    //On récupere le nom du profile
+    form.on('field', function(name, value) {  
+      switch(name){
+        case 'profile':
+          parameters.profile = value;
+        break;
+        case 'name':
+          parameters.name = value;
+          self.name = value;
+        break;
+      }
+
+    });
+
+    // log any errors that occur
+    form.on('error', function(err) {
+      LogError('An error has occured: ' + err);
+      cancelWFJob(jobID);
+    });
+
+    // once all the files have been uploaded, send a response to the client
+    form.on('end', function() {
+      res.end('success');
+      if(!self.isUploadCancel)
+        jobs[jobID] = new BBQJob(jobID, parameters);
+    });
+
+    // parse the incoming request containing the form data
+    form.parse(req);
+
+    return;
+  } catch(e) {LogError('Error uploading file on line '+e.lineNumber+' : '+e.message); }
+};
 
 //Routines
 try{
@@ -264,50 +270,52 @@ var monitoringRoutine = new CronJob('* * * * * *', function() {  //Routine toute
 }, null, true); } catch(e){ LogError('On routine '+e.message); }
 
 var updateMonitoring = function(){
-  for(var i in jobs){
-    if(!monitoring[i]){
-        monitoring[i] = {
-          name: jobs[i].name,
-          displayName: jobs[i].name.length > 15 ? jobs[i].name.substring(0, 12)+'...' : jobs[i].name,
-          id: jobs[i].id
-        };
-    }
+  try{
+    for(var i in jobs){
+      if(!monitoring[i]){
+          monitoring[i] = {
+            name: jobs[i].name,
+            displayName: jobs[i].name.length > 15 ? jobs[i].name.substring(0, 12)+'...' : jobs[i].name,
+            id: jobs[i].id
+          };
+      }
 
-    switch(jobs[i].status){
-      case 'Transcoding':
-        monitoring[i].percent = jobs[i].percent;
-        monitoring[i].status = 'Transcode';
-      break;
-      case 'Uploading':
-        monitoring[i].percent = jobs[i].monitoring;
-        monitoring[i].status = 'Upload';
-      break;
-      case 'ERROR':
-        monitoring[i].percent = 100;
-        monitoring[i].status = 'ERROR';
-      break;
-      case 'DONE':
-        monitoring[i].percent = 100;
-        monitoring[i].status = 'DONE';
-      break;
-      case 'STOP':
-        monitoring[i].percent = 100;
-        monitoring[i].status = 'STOP';
-      break;
+      switch(jobs[i].status){
+        case 'Transcode':
+          monitoring[i].percent = jobs[i].percent;
+          monitoring[i].status = 'Transcode';
+        break;
+        case 'Upload':
+          monitoring[i].percent = jobs[i].percent;
+          monitoring[i].status = 'Upload';
+        break;
+        case 'ERROR':
+          monitoring[i].percent = 100;
+          monitoring[i].status = 'ERROR';
+        break;
+        case 'DONE':
+          monitoring[i].percent = 100;
+          monitoring[i].status = 'DONE';
+        break;
+        case 'STOP':
+          monitoring[i].percent = 100;
+          monitoring[i].status = 'STOP';
+        break;
+      }
+      if(monitoring[i].name == 'Waiting ...' && monitoring[i].status == 'STOP')
+        monitoring[i].name = 'Aborded';    
+      if(monitoring[i].name == 'Waiting ...' && monitoring[i].name != jobs[i].name){
+        monitoring[i].name = jobs[i].name;
+        monitoring[i].displayName = jobs[i].name.length > 15 ? jobs[i].name.substring(0, 12)+'...' : jobs[i].name;
+      }
     }
-    if(monitoring[i].name == 'Waiting ...' && monitoring[i].status == 'STOP')
-      monitoring[i].name = 'Aborded';    
-    if(monitoring[i].name == 'Waiting ...' && monitoring[i].name != jobs[i].name){
-      monitoring[i].name = jobs[i].name;
-      monitoring[i].displayName = jobs[i].name.length > 15 ? jobs[i].name.substring(0, 12)+'...' : jobs[i].name;
-    }
-  }
-  fs.writeFile(path.join(__dirname, '../common/tmp/monitoring/monitoring.json'), JSON.stringify(monitoring), (err) =>{
-    if(err)
-      LogError('Writing monitoring file '+err);
-  });
+    fs.writeFile(path.join(__dirname, '../common/tmp/monitoring/monitoring.json'), JSON.stringify(monitoring), (err) =>{
+      if(err)
+        LogError('Writing monitoring file '+err);
+    });
 
-  io.local.emit('monitoring', monitoring);
+    io.local.emit('monitoring', monitoring);
+  } catch(e) { LogError('In monitoring construction: '+e.message); }
 
 };
 
@@ -341,22 +349,27 @@ var newWFJob = function (parameters) {
 };
 
 var cancelWFJob = function(id){
-  if(jobs[id]){
-    if(jobs[id].status == 'Upload')
-      jobs[id].res.end('Abord');
-    if(jobs[id].status == 'Transcode')
-      jobs[id].ffmpegProcess.kill();
-      jobs[id].status = 'STOP';
-      LogWorkflow('Job '+ jobID + 'Killed');
-    if(jobs[id].name == 'Waiting ...')
-      jobs[id].name = 'Aborded';
+  try{
+    if(jobs[id]){
+      if(jobs[id].status == 'Upload'){
+        jobs[id].stopUpload('Abord');
+      }
+      if(jobs[id].status == 'Transcode'){
+        jobs[id].ffmpegProcess.kill('SIGKILL');
+        jobs[id].status = 'STOP';
+        LogWorkflow('Job '+ id + 'Killed');
+      }
+      if(jobs[id].name == 'Waiting ...'){
+        jobs[id].name = 'Aborded';
+      }
 
-    jobs[id].percent = 100;
-    jobs[id].status = 'STOP';
-  }
-  LogWarning('JOB ABORDED '+jobs[id].name);
-  
-  updateMonitoring();
+      jobs[id].percent = 100;
+      jobs[id].status = 'STOP';
+    }
+    LogWarning('JOB ABORDED '+jobs[id].name);
+    
+    updateMonitoring();
+  } catch(e) {LogError('Cancel Job : '+e.message); }
 };
 
 var BBQJob = function (jobID, parameters) {
@@ -365,7 +378,7 @@ var BBQJob = function (jobID, parameters) {
     self.id = jobID;
     self.percent = '0';
     self.name = parameters.name;
-    self.status = 'Transcoding';
+    self.status = 'Transcode';
     var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile')))[parameters.profile];
     self.profile = profile;
     self.ffmpegProcess = ffmpeg(parameters.path)
@@ -385,7 +398,7 @@ var BBQJob = function (jobID, parameters) {
                             self.percent = 100;
                             self.status = 'ERROR';
                           });
-    LogWorkflow('Transcoding: ' + parameters.name);
+    LogWorkflow('Transcode: ' + parameters.name);
 
   }
   catch(e){
