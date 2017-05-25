@@ -1,20 +1,21 @@
-let express = require('express');
-let formidable = require('formidable');
-let app = express();
-let server = require('http').createServer(app);
-let io = require('socket.io')(server);
-let path = require('path');
-let fs = require('fs');
-let ffmpeg = require('fluent-ffmpeg');
-const crypto = require('crypto');
+var express = require('express');
+var formidable = require('formidable');
+var app = express();
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
+var path = require('path');
+var fs = require('fs');
+var os = require('os');
+var ffmpeg = require('fluent-ffmpeg');
+var crypto = require('crypto');
 var CronJob = require('cron').CronJob;
 ffmpeg.setFfmpegPath(path.join(__dirname, '../common/bin/ffmpeg.exe'));
 ffmpeg.setFfprobePath(path.join(__dirname, '../common/bin/ffprobe.exe'));
-/*let WatchIO = require('watch.io'),
+/*var WatchIO = require('watch.io'),
   watcher = new WatchIO(); */
 
 // LOG 
-const colors = {
+var colors = {
  Reset: "\x1b[0m",
  Bright: "\x1b[1m",
  Dim: "\x1b[2m",
@@ -47,8 +48,8 @@ const colors = {
 };
 var jobs = {};
 var monitoring = {};
-
-
+var serverStartTime = new Date();
+var alarms = {};
 
 function dateLog () {
   var date = new Date();
@@ -67,10 +68,46 @@ function dateLog () {
           ('00' + milliseconds).slice(-3) +
           '] ';
 }
-var LogError = function(text){ console.error(colors.fg.Red + dateLog() + 'ERROR   ' + text); };
-var LogInfo = function(text){ console.log(colors.fg.White + dateLog() + 'INFO   ' + text); };
-var LogWarning = function(text){ console.log(colors.fg.Yellow + dateLog() + 'WARNING   ' + text); };
-var LogWorkflow = function(text) { console.log(colors.fg.Cyan + dateLog() + 'WORKFLOW   ' + text); };
+function getLogFileName(){
+  var now = new Date();
+  return ''+path.join(__dirname, '../common/tmp/log','log-' +("0" + now.getDate()).slice(-2) + '-' + ("0" + (now.getMonth()+1)).slice(-2) + '-' + now.getFullYear()+'.log');
+}
+var LogError = function(text){ 
+  console.error(colors.fg.Red + dateLog() + 'ERROR   ' + text); 
+  fs.appendFile(getLogFileName(), (dateLog() + 'ERROR   ' + text+'\r\n'), {
+    encoding: 'utf8',
+    mode: '0o666',
+    flag: 'a+'
+  }, function(err){
+    if(err)
+      console.log('ERROR logError '+err);      
+  });
+};
+var LogInfo = function(text){ 
+  console.log(colors.fg.White + dateLog() + 'INFO   ' + text); 
+  fs.appendFile(getLogFileName(), (dateLog() + 'INFO   ' + text+'\r\n'), function(err){
+    if(err)
+      console.log('ERROR logInfo '+err);
+  });
+};
+var LogWarning = function(text){ 
+  console.log(colors.fg.Yellow + dateLog() + 'WARNING   ' + text); 
+  fs.appendFile(getLogFileName(), (dateLog() + 'WARNING  ' + text+'\r\n'), function(err){
+    if(err)
+      console.log('ERROR logWarning '+err);      
+  });
+};
+var LogWorkflow = function(text) { 
+  console.log(colors.fg.Cyan + dateLog() + 'WORKFLOW   ' + text); 
+  fs.appendFile(getLogFileName(), (dateLog() + 'WORKFLOW  ' + text+'\r\n'), {
+    encoding: 'utf8',
+    mode: '0o666',
+    flag: 'a+'
+  }, function(err){
+    if(err)
+      console.log('ERROR logWorkflow '+err);      
+  });
+};
 
 //HTTP / WS Section
 app.use('/public', express.static(path.join(__dirname, '../client')));
@@ -99,7 +136,7 @@ app.get('/download/:fileName', (req, res) => {
 });
 app.post('/upload', (req, res) => {
     var jobID = crypto.randomBytes(32).toString('hex');
-    jobs[jobID] = new upload(req, res, jobID);
+    jobs[jobID] = new Upload(req, res, jobID);
 });
 
 io.sockets.on('connection', (socket) => {
@@ -185,7 +222,7 @@ io.sockets.on('connection', (socket) => {
   LogWorkflow('New user connected');
 });
 
-var upload = function(req, res, jobID){
+var Upload = function(req, res, jobID){
   var self = this;
   try{
     self.id = jobID;
@@ -265,9 +302,13 @@ try{
         monitoring = JSON.parse(data);
     });
   } catch(e) {}
-var monitoringRoutine = new CronJob('* * * * * *', function() {  //Routine toutes les secondes
-  updateMonitoring();
-}, null, true); } catch(e){ LogError('On routine '+e.message); }
+  var monitoringRoutine = new CronJob('* * * * * *', function() {  //Routine toutes les secondes
+    updateMonitoring();
+  }, null, true); 
+  var serverStatus = new CronJob('* * * * * *', function() {  //Routine toutes les secondes
+    updateserverStatus();
+  }, null, true); 
+} catch(e){ LogError('On routine '+e.message); }
 
 var updateMonitoring = function(){
   try{
@@ -318,6 +359,34 @@ var updateMonitoring = function(){
   } catch(e) { LogError('In monitoring construction: '+e.message); }
 
 };
+var updateserverStatus = function(){
+  try{
+    var serverStatus = {
+      'uptime': Math.floor(process.uptime()),
+      'nodeVersion': process.version,
+      'serverFreeMem': os.freemem(),
+      'hostname': os.hostname(),
+      'plateform': os.platform(),
+      'osVersion': os.release(),
+      'osUptime': Math.floor(os.uptime()),
+      'cpuNumber': getCPUNumber(),
+      'alarms': alarms
+    };
+
+    //LogWarning(JSON.stringify(serverStatus));
+
+    io.local.emit('serverStatus', serverStatus);
+  } catch(e){ LogError('Updating ServerStatus: '+e.message); }
+};
+
+var getCPUNumber = function (){
+  var cpus = os.cpus();
+  var cpuNumber = 0;
+  for(var i in cpus){
+    cpuNumber++;
+  }
+  return cpuNumber;
+};
 
 //Job Section
 /*watcher.watch(path.join(__dirname, '../common/tmp')); //WatchFolder !!! A metre dans une fonction pour gestion depuis interface
@@ -339,7 +408,7 @@ watcher.on('create', function ( file, stat ) {
 
 var newWFJob = function (parameters) {
   try{
-    let jobID = crypto.randomBytes(32).toString('hex');
+    var jobID = crypto.randomBytes(32).toString('hex');
     jobs[jobID] = new BBQJob(jobID, parameters);
   }
   catch(e){
@@ -409,13 +478,15 @@ var BBQJob = function (jobID, parameters) {
 };
 
 
-try{ server.listen(8080); } catch(e){ LogError('Starting server',e); }
+try{ server.listen(8080); } catch(e){ LogError('Starting server '+e.message); }
 
 process.on('exit', (code) => {
 		LogInfo('Exit code: '+code);
 });
 
 process.on('uncaughtException', (err) =>{
+  var errorID = crypto.randomBytes(32).toString('hex');
+  alarms[id] = err;
   LogError('FATAL ERROR!!: '+err);
 	//process.exit(1);
 });
