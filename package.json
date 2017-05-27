@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon server/index.js",
     "start": "server/bbq.exe",
+    "service": "node server/service.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,6 +26,7 @@
     "formidable": "^1.1.1",
     "nexe": "^1.1.2",
     "nodemon": "^1.11.0",
+    "os-service": "^1.4.1",
     "socket.io": "^1.7.3",
     "utf-8-validate": "^3.0.1"
   },

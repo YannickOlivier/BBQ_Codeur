@@ -1,3 +1,4 @@
+var service = require ("os-service");
 var express = require('express');
 var formidable = require('formidable');
 var app = express();
