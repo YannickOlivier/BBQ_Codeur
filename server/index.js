@@ -1,4 +1,4 @@
-var service = require ("os-service");
+var EventLogger = require('node-windows').EventLogger;
 var express = require('express');
 var formidable = require('formidable');
 var app = express();
@@ -51,6 +51,7 @@ var jobs = {};
 var monitoring = {};
 var serverStartTime = new Date();
 var alarms = {};
+var windowsLog = new EventLogger('BBQ_Codeur');
 
 function dateLog () {
   var date = new Date();
@@ -75,6 +76,7 @@ function getLogFileName(){
 }
 var LogError = function(text){ 
   console.error(colors.fg.Red + dateLog() + 'ERROR   ' + text); 
+  windowsLog.error('ERROR   ' + text);
   fs.appendFile(getLogFileName(), (dateLog() + 'ERROR   ' + text+'\r\n'), {
     encoding: 'utf8',
     mode: '0o666',
@@ -93,6 +95,7 @@ var LogInfo = function(text){
 };
 var LogWarning = function(text){ 
   console.log(colors.fg.Yellow + dateLog() + 'WARNING   ' + text); 
+  windowsLog.warn('WARNING   ' + text);
   fs.appendFile(getLogFileName(), (dateLog() + 'WARNING  ' + text+'\r\n'), function(err){
     if(err)
       console.log('ERROR logWarning '+err);      

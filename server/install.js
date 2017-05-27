@@ -11,6 +11,7 @@ var svc = new Service({
 // process is available as a service.
 svc.on('install',function(){
   svc.start();
+  console.log('QQB_Codeur was successfully installed');
 });
 
 svc.on('alreadyinstalled', function(){
