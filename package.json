@@ -4,7 +4,8 @@
   "description": "school project",
   "main": "server/index.js",
   "scripts": {
-    "start": "nodemon server/index.js",
+    "dev": "nodemon server/index.js",
+    "start": "server/bbq.exe",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -29,7 +30,7 @@
   },
   "nexe": {
     "input": "./server/index.js",
-    "output": "bbq.exe",
+    "output": "/server/bbq.exe",
     "temp": "src",
     "runtime": {
       "framework": "node",
