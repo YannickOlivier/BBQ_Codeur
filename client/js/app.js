@@ -138,7 +138,7 @@ jQuery(function ($) {
 
           // Test si téléchargement possible
           var disabled_button = '';
-            if (monitoring[i].status == 'ERROR' || monitoring[i].status == 'STOP') {
+            if (monitoring[i].status == 'Transcode' || monitoring[i].status == 'ERROR' || monitoring[i].status == 'STOP') {
               disabled_button = 'disabled'
             } else {
               disabled_button = '';

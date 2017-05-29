@@ -88,22 +88,10 @@
           </div>
           <div class="col-sm-9 col-md-9">
               <div class="corpsTop">
-                          <h3> Choix du mode de l'utilisateur : </h3>
-                          <input id="toggle-trigger" type="checkbox" checked data-toggle="toggle" data-on="User Mode" data-off="Expert Mode" data-onstyle="success" data-offstyle="danger">
-                          <button class="btn btn-success" onclick="toggleOn()">User Mode</button>
-                          <button class="btn btn-danger" onclick="toggleOff()">Expert Mode</button>
-                          <script>
-                          function toggleOn() {
-                            $('#toggle-trigger').bootstrapToggle('on')
-                          }
-                          function toggleOff() {
-                            $('#toggle-trigger').bootstrapToggle('off')
-                          }
-                          </script>
+                          <h3> Création et modification des profils : </h3>
+
             	</div>
               <div class="corpsBottom">
-                <h3> Création et modification des profils </h3>
-                <br>
                     <div class"forme-group">
                       <button type="button" class"btn btn-default" id="NewProfil">Nouveau profil</button>
                     </div>
@@ -114,8 +102,8 @@
                         </select>
                         <label for="description">Nom du profile :</label>
                         <input type="text" class="form-control" id="NameProfil">
-                        <label for="Format">Résolution :</label>
-                        <select class="form-control" id="Format" placeholder="Résolution">
+                        <label for="Format">Définition :</label>
+                        <select class="form-control" id="Format" placeholder="Définition">
                             <option value="same">Same As Source</option>
                             <option value="3840x2160">3840x2160</option>
                             <option value="1920x1080">1920x1080</option>
@@ -126,11 +114,49 @@
                             <option>x265</option>
                             <option>x264</option>
                         </select>
+                        <div class="control-group">
+                        <label for="vDebit">Débit vidéo :</label>
+                        </div>
+                        <div class="control-group">
+                        <input type="text" class="form-control" id="vDebit" placeholder="Débit en Mb/s - Exemple : 9.5 - Sans espace"
+                        </div>
+                        <div class="control-group">
+                        <label for="vGOP">Taille du GOP :</label>
+                        </div>
+                        <div class="control-group">
+                        <input type="text" class="form-control" id="vGOP" placeholder="Exemple : 12 - Sans espace"
+                        </div>
+                        <div class="control-group">
+                        <label for="vQP">Quantization Parameter :</label>
+                        </div>
+                        <div class="control-group">
+                        <input type="text" class="form-control" id="vQP" placeholder="De 0 à 51 - Exemple : 23 - Sans espace"
+                        </div>
+
+                        <div class="control-group">
+                        <label for="vCTU">Découpage CTU :</label>
+                        </div>
+                        <select class="form-control" id="vCTU" placeholder="CTU">
+                            <option>64x64</option>
+                            <option>32x32</option>
+                            <option>16x16</option>
+                            <option>8x8</option>
+                            <option>4x4</option>
+                        </select>
+
+                        <div class="control-group">
                         <label for="aCodec">Codec audio :</label>
                         <select class="form-control" id="aCodec" placeholder="Codec Audio">
                             <option>AAC</option>
                             <option>PCM</option>
                         </select>
+                        </div>
+                        <div class="control-group">
+                        <label for="aDebit">Débit Audio :</label>
+                        </div>
+                        <div class="control-group">
+                        <input type="text" class="form-control" id="aDebit" placeholder="Débit en Kb/s - Exemple : 320.0 - Sans espace"
+                        </div>
                         <label for="FrameRate">Nombre d'images :</label>
                         <select class="form-control" id="FrameRate" placeholder="FrameRate">
                             <option value="same">Same As Source</option>
@@ -143,6 +169,11 @@
                         <select class="form-control" id="WPP" placeholder="WPP">
                             <option>Oui</option>
                             <option>Non</option>
+                        </select>
+                        <label for="lossless">Lossless :</label>
+                        <select class="form-control" id="lossless" placeholder="Lossless">
+                            <option>Non</option>
+                            <option>Oui</option>
                         </select>
                     <br>
                     <div class"forme-list">
