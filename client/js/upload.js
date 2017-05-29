@@ -1,4 +1,4 @@
-jQuery(function ($) {
+
 
 $('.upload-btn').on('click', function (){
     console.log('Click sur le bouton Upload-BTN');
@@ -68,4 +68,3 @@ $('#Transcode').on('click', function(){
 });
 
 
-});

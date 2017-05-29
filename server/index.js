@@ -114,7 +114,9 @@ var LogWorkflow = function(text) {
 };
 
 //HTTP / WS Section
-app.use('/public', express.static(path.join(__dirname, '../client')));
+app.use('/public', express.static(path.join(__dirname, '../client'), {
+  etag: false
+}));
 
 app.get('/', (req, res) =>{ res.sendFile(path.join(__dirname, '../client/index.html')); });
 app.get('/index.html', (req, res) =>{ res.sendFile(path.join(__dirname, '../client/index.html')); });
