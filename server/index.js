@@ -117,6 +117,7 @@ var LogWorkflow = function(text) {
 app.use('/public', express.static(path.join(__dirname, '../client'), {
   etag: false
 }));
+try{delete express.bodyParser.parse['multipart/form-data'];} catch(e){}
 
 app.get('/', (req, res) =>{ res.sendFile(path.join(__dirname, '../client/index.html')); });
 app.get('/index.html', (req, res) =>{ res.sendFile(path.join(__dirname, '../client/index.html')); });
@@ -242,6 +243,8 @@ var Upload = function(req, res, jobID){
       res.end('abord');
       self.isUploadCancel = true;
     };
+
+    var NameOfUploadFile = '';
     // create an incoming form object
     var form = new formidable.IncomingForm();
     var parameters = {};
@@ -254,8 +257,7 @@ var Upload = function(req, res, jobID){
     // every time a file has been uploaded successfully,
     // rename it to it's orignal name
     form.on('file', function(field, file) {
-      fs.rename(file.path, path.join(form.uploadDir, file.name));
-      parameters.path = path.join(form.uploadDir, file.name);
+      self.uploadPath = file.path;
     });
 
     form.on('fileBegin', function(name, file) {
@@ -273,11 +275,9 @@ var Upload = function(req, res, jobID){
           parameters.profile = value;
         break;
         case 'name':
-          parameters.name = value;
           self.name = value;
-        break;
+        break; 
       }
-
     });
 
     // log any errors that occur
@@ -289,8 +289,27 @@ var Upload = function(req, res, jobID){
     // once all the files have been uploaded, send a response to the client
     form.on('end', function() {
       res.end('success');
-      if(!self.isUploadCancel)
-        jobs[jobID] = new BBQJob(jobID, parameters);
+      fs.exists(path.join(form.uploadDir, self.name), function(exists){
+        if(exists){
+          var ext = path.extname(self.name);
+          fileName = '' + path.basename(self.name, ext)  + '-' + crypto.randomBytes(6).toString('hex') + ext;
+          fs.rename(self.uploadPath, path.join(form.uploadDir, fileName), function(){
+            parameters.path = path.join(form.uploadDir, fileName);
+            parameters.name = fileName;
+            self.name = fileName;
+            if(!self.isUploadCancel)
+                jobs[jobID] = new BBQJob(jobID, parameters);
+          });
+        }
+        else{
+          fs.rename(self.uploadPath, path.join(form.uploadDir, self.name), function(){
+            parameters.path = path.join(form.uploadDir, self.name);
+            parameters.name = self.name;
+            if(!self.isUploadCancel)
+              jobs[jobID] = new BBQJob(jobID, parameters);
+          });
+        }
+      });
     });
 
     // parse the incoming request containing the form data
@@ -468,8 +487,7 @@ var BBQJob = function (jobID, parameters) {
     var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile')))[parameters.profile];
     self.profile = profile;
     self.startTime = new Date();
-    var customOptions = [];
-
+  
     switch(profile.vCodec){
       case 'x264':
         var vCodec = 'libx264';
@@ -481,28 +499,71 @@ var BBQJob = function (jobID, parameters) {
         var vCodec = 'libx264';
       break;
     }
-    
+
+    try{
+      var customOptions = [];
+      var customComplexFilter = [];
+      var customVideoFilter = [];
+
+      if(!profile.Format === 'same')
+        customVideoFilter.push('scale='+profile.Format)
+
+      if(!profile.FrameRate === 'same')
+        customOptions.push('-r '+profile.FrameRate);
+
+      if(profile.vDebit)
+        customOptions.push('-b:v ' + profile.vDebit + 'k'); 
+
+      if(profile.vGOP)
+        customOptions.push('-g '+profile.vGOP);
+
+      if(profile.vQP)
+        customOptions.push('-crf '+profile.vQP);
+
+      if(profile.WPP)
+       // customComplexFilter.push('wpp');
+      
+      if(profile.Lossless)
+        customOptions.push('--lossless');
+
+      customOptions.push('-psnr');
+    }
+    catch(e){
+      LogError('Pushing Custom parameters String for: '+self.name);
+    }
     self.ffmpegProcess = ffmpeg(parameters.path)
                           .videoCodec(vCodec)
-                          .size(profile.Format === 'same' ? '100%': profile.Format)
                           .audioCodec(profile.aCodec == 'AAC' ? 'aac': 'pcm_s16le')
+                          .audioBitrate(profile.aDebit ? profile.aDebit: '48000k')
                           .inputOption(customOptions)
+                          //.complexFilter(customComplexFilter)
+                          .videoFilter(customVideoFilter)
+                          .on('start', function(commandLine) {
+                            LogWorkflow('Spawned Ffmpeg with command: ' + commandLine);
+                          })
                           .on('progress', function(progress) {
                             //LogInfo('Processing: ' + progress.percent + ' % done');
                             self.percent = Math.floor(progress.percent);
                           })
                           .save(path.join(__dirname, '../common/output',parameters.name))  
-                          .on('end', function() {
+                          .on('end', function(stdout, stderr) {
+                            console.log('toto');
+                            console.log(stdout);
                             self.percent = 100;
                             self.status = 'DONE';
                             self.endTime = new Date();
+                            self.executionTime = self.startTime - self.endTime;
+                            LogWorkflow(sef.name + 'was successfully INGESTED');
                           }) 
                           .on('error', function(err, stdout, stderr) {
+                            LogError('FFMPEG ERROR on '+parameters.name+' : '+err);
                             self.percent = 100;
                             self.status = 'ERROR';
+                          })  
+                          .on('stderr', function(stderrLine) {
+                            //LogError('Stderr output: ' + stderrLine);
                           });
     LogWorkflow('Transcode: ' + parameters.name);
-
   }
   catch(e){
     LogError('During transcode: '+e.message);
