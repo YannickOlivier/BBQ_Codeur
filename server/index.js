@@ -307,10 +307,14 @@ try{
     });
   } catch(e) {}
   var monitoringRoutine = new CronJob('* * * * * *', function() {  //Routine toutes les secondes
-    updateMonitoring();
+    try{
+      updateMonitoring();
+    } catch(e){ LogError('updateMonitoring: '+e.message); }
   }, null, true); 
   var serverStatus = new CronJob('* * * * * *', function() {  //Routine toutes les secondes
-    updateserverStatus();
+    try{
+      updateserverStatus();
+    } catch(e){ LogError('updateserverStatus: '+e.message);}
   }, null, true); 
 } catch(e){ LogError('On routine '+e.message); }
 
@@ -384,12 +388,17 @@ var updateserverStatus = function(){
 };
 
 var getCPUNumber = function (){
-  var cpus = os.cpus();
-  var cpuNumber = 0;
-  for(var i in cpus){
-    cpuNumber++;
+  try{
+    var cpus = os.cpus();
+    var cpuNumber = 0;
+    for(var i in cpus){
+      cpuNumber++;
+    }
+    return cpuNumber;
   }
-  return cpuNumber;
+  catch(e){
+    LogError('Getting CPU Number: '+e.message);
+  }
 };
 
 //Job Section
