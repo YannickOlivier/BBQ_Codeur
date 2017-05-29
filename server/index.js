@@ -469,7 +469,7 @@ var BBQJob = function (jobID, parameters) {
     self.profile = profile;
     self.ffmpegProcess = ffmpeg(parameters.path)
                           .videoCodec('libx264')
-                          .size(profile.Format === 'same' ? '': rofile.Format)
+                          .size(profile.Format === 'same' ? '': profile.Format)
                           .audioCodec(profile.aCodec == 'AAC' ? 'aac': 'pcm_s16le')
                           .on('progress', function(progress) {
                             LogInfo('Processing: ' + progress.percent + ' % done');
