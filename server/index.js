@@ -158,7 +158,7 @@ io.sockets.on('connection', (socket) => {
   });
 
   socket.on('getProfile', (request) => {
-    LogInfo('Get All Profile');
+    LogInfo('Get All Profile request');
     try{
       fs.readFile((path.join(__dirname, '../common/profiles/bbq.profile')), (err, data) => {
         if(err){
@@ -215,10 +215,12 @@ io.sockets.on('connection', (socket) => {
   });
 
   socket.on('getMonitoring', (request) => {
+    LogInfo('Get monitoring Request');
     socket.emit('monitoring', monitoring);
   });
 
   socket.on('clearMonitoring', function(request){
+    LogInfo('Clear monitoring Request');
     monitoring = {};
     updateMonitoring();
   });
@@ -313,8 +315,8 @@ try{
   }, null, true); 
   var serverStatus = new CronJob('* * * * * *', function() {  //Routine toutes les secondes
     try{
-      updateserverStatus();
-    } catch(e){ LogError('updateserverStatus: '+e.message);}
+      updateServerStatus();
+    } catch(e){ LogError('updateServerStatus: '+e.message);}
   }, null, true); 
 } catch(e){ LogError('On routine '+e.message); }
 
@@ -367,7 +369,7 @@ var updateMonitoring = function(){
   } catch(e) { LogError('In monitoring construction: '+e.message); }
 
 };
-var updateserverStatus = function(){
+var updateServerStatus = function(){
   try{
     var serverStatus = {
       'uptime': Math.floor(process.uptime()),
@@ -465,7 +467,7 @@ var BBQJob = function (jobID, parameters) {
     self.profile = profile;
     self.ffmpegProcess = ffmpeg(parameters.path)
                           .videoCodec('libx264')
-                          .size(profile.Format)
+                          .size(profile.Format === 'same' ? '': rofile.Format)
                           .audioCodec(profile.aCodec == 'AAC' ? 'aac': 'pcm_s16le')
                           .on('progress', function(progress) {
                             LogInfo('Processing: ' + progress.percent + ' % done');
