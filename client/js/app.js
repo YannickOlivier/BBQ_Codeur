@@ -4,12 +4,8 @@ jQuery(function ($) {
 
     var socket = io('http://localhost:8080');
     // chaque chargement
-
-    function init(){
     socket.emit('getProfile');
     socket.emit('getMonitoring');
-
-    }
 
     //On change le nom du profile dans la liste
     console.log('Nouveau profile');
