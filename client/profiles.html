@@ -126,11 +126,31 @@
                             <option>x265</option>
                             <option>x264</option>
                         </select>
+                        <div class="control-group">
+                        <label for="vDebit">Débit vidéo :</label>
+                        </div>
+                        <div class="control-group">
+                        <input type="text" class="form-control" id="vDebit" placeholder="Débit en Mb/s - Exemple : 9.5 - Sans espace"
+                        </div>
+                        <div class="control-group">
+                        <label for="vGOP">Taille du GOP :</label>
+                        </div>
+                        <div class="control-group">
+                        <input type="text" class="form-control" id="vGOP" placeholder="Valeur entre 0 et - Exemple : 9.5 - Sans espace"
+                        </div>
+                        <div class="control-group">
                         <label for="aCodec">Codec audio :</label>
                         <select class="form-control" id="aCodec" placeholder="Codec Audio">
                             <option>AAC</option>
                             <option>PCM</option>
                         </select>
+                        </div>
+                        <div class="control-group">
+                        <label for="aDebit">Débit Audio :</label>
+                        </div>
+                        <div class="control-group">
+                        <input type="text" class="form-control" id="aDebit" placeholder="Débit en Kb/s - Exemple : 320.0 - Sans espace"
+                        </div>
                         <label for="FrameRate">Nombre d'images :</label>
                         <select class="form-control" id="FrameRate" placeholder="FrameRate">
                             <option value="same">Same As Source</option>
