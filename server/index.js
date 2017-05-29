@@ -19,7 +19,7 @@ ffmpeg.setFfprobePath(path.join(__dirname, '../common/bin/ffprobe.exe'));
 var colors = {
  Reset: "\x1b[0m",
  Bright: "\x1b[1m",
- Dim: "\x1b[2m",
+ Dim: "\x1b[oad2m",
  Underscore: "\x1b[4m",
  Blink: "\x1b[5m",
  Reverse: "\x1b[7m",
@@ -184,7 +184,7 @@ io.sockets.on('connection', (socket) => {
     profile[request.name] = request;
     tempString = JSON.stringify(profile);
     fs.writeFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), tempString);
-    socket.broadcast('profile', profile);
+    io.local.emit('profile', profile);
     return;
   });
 
@@ -194,7 +194,7 @@ io.sockets.on('connection', (socket) => {
     delete(profile[request.name]);
     tempString = JSON.stringify(profile);
     fs.writeFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), tempString);
-    socket.broadcast('profile', profile);
+    io.local.emit('profile', profile);
     return;
   });
 
