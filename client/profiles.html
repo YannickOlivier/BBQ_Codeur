@@ -136,8 +136,26 @@
                         <label for="vGOP">Taille du GOP :</label>
                         </div>
                         <div class="control-group">
-                        <input type="text" class="form-control" id="vGOP" placeholder="Valeur entre 0 et - Exemple : 9.5 - Sans espace"
+                        <input type="text" class="form-control" id="vGOP" placeholder="Exemple : 12 - Sans espace"
                         </div>
+                        <div class="control-group">
+                        <label for="vQP">Quantization Parameter :</label>
+                        </div>
+                        <div class="control-group">
+                        <input type="text" class="form-control" id="vQP" placeholder="De 0 à 51 - Exemple : 23 - Sans espace"
+                        </div>
+
+                        <div class="control-group">
+                        <label for="vCTU">Découpage CTU :</label>
+                        </div>
+                        <select class="form-control" id="vCTU" placeholder="CTU">
+                            <option>64x64</option>
+                            <option>32x32</option>
+                            <option>16x16</option>
+                            <option>8x8</option>
+                            <option>4x4</option>
+                        </select>
+
                         <div class="control-group">
                         <label for="aCodec">Codec audio :</label>
                         <select class="form-control" id="aCodec" placeholder="Codec Audio">
@@ -163,6 +181,11 @@
                         <select class="form-control" id="WPP" placeholder="WPP">
                             <option>Oui</option>
                             <option>Non</option>
+                        </select>
+                        <label for="lossless">Lossless :</label>
+                        <select class="form-control" id="lossless" placeholder="Lossless">
+                            <option>Non</option>
+                            <option>Oui</option>
                         </select>
                     <br>
                     <div class"forme-list">
