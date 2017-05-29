@@ -118,8 +118,16 @@
                         <label for="vDebit">Débit vidéo :</label>
                         </div>
                         <div class="control-group">
-                        <input type="text" class="form-control" id="vDebit" placeholder="Débit en Mb/s - Exemple : 9.5 - Sans espace"
+                        <input type="text" class="form-control" id="vDebit" placeholder="Débit en Kb/s - Exemple : 85000 - Sans espace"
                         </div>
+                        <label for="FrameRate">Nombre d'images :</label>
+                        <select class="form-control" id="FrameRate" placeholder="FrameRate">
+                            <option value="same">Same As Source</option>
+                            <option value="60p">60p</option>
+                            <option value="50p">50p</option>
+                            <option value="30p">30p</option>
+                            <option value="25p">25p</option>
+                        </select>
                         <div class="control-group">
                         <label for="vGOP">Taille du GOP :</label>
                         </div>
@@ -137,13 +145,10 @@
                         <label for="vCTU">Découpage CTU :</label>
                         </div>
                         <select class="form-control" id="vCTU" placeholder="CTU">
-                            <option>64x64</option>
-                            <option>32x32</option>
-                            <option>16x16</option>
-                            <option>8x8</option>
-                            <option>4x4</option>
+                            <option value="64">64x64</option>
+                            <option value="32">32x32</option>
+                            <option value="16">16x16</option>
                         </select>
-
                         <div class="control-group">
                         <label for="aCodec">Codec audio :</label>
                         <select class="form-control" id="aCodec" placeholder="Codec Audio">
@@ -157,14 +162,6 @@
                         <div class="control-group">
                         <input type="text" class="form-control" id="aDebit" placeholder="Débit en Kb/s - Exemple : 320.0 - Sans espace"
                         </div>
-                        <label for="FrameRate">Nombre d'images :</label>
-                        <select class="form-control" id="FrameRate" placeholder="FrameRate">
-                            <option value="same">Same As Source</option>
-                            <option value="60p">60p</option>
-                            <option value="50p">50p</option>
-                            <option value="30p">30p</option>
-                            <option value="25p">25p</option>
-                        </select>
                         <label for="WPP">Activer le WPP :</label>
                         <select class="form-control" id="WPP" placeholder="WPP">
                             <option>Oui</option>
@@ -174,6 +171,18 @@
                         <select class="form-control" id="lossless" placeholder="Lossless">
                             <option>Non</option>
                             <option>Oui</option>
+                        </select>
+                        <label for="preset">Preset :</label>
+                        <select class="form-control" id="preset" placeholder="Lossless">
+                            <option>ultrafast</option>
+                            <option>superfast</option>
+                            <option>veryfast</option>
+                            <option>fast</option>
+                            <option>medium</option>
+                            <option>slow</option>
+                            <option>slower</option>
+                            <option>veryslow</option>
+                            <option>slower</option>
                         </select>
                     <br>
                     <div class"forme-list">
