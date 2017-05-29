@@ -467,18 +467,35 @@ var BBQJob = function (jobID, parameters) {
     self.status = 'Transcode';
     var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile')))[parameters.profile];
     self.profile = profile;
+    self.startTime = new Date();
+    var customOptions = [];
+
+    switch(profile.vCodec){
+      case 'x264':
+        var vCodec = 'libx264';
+      break;
+      case 'x265':
+        var vCodec = 'libx265';
+      break;
+      default:
+        var vCodec = 'libx264';
+      break;
+    }
+    
     self.ffmpegProcess = ffmpeg(parameters.path)
-                          .videoCodec('libx264')
-                          .size(profile.Format === 'same' ? '': profile.Format)
+                          .videoCodec(vCodec)
+                          .size(profile.Format === 'same' ? '100%': profile.Format)
                           .audioCodec(profile.aCodec == 'AAC' ? 'aac': 'pcm_s16le')
+                          .inputOption(customOptions)
                           .on('progress', function(progress) {
-                            LogInfo('Processing: ' + progress.percent + ' % done');
-                            self.percent = Math.round(progress.percent);
+                            //LogInfo('Processing: ' + progress.percent + ' % done');
+                            self.percent = Math.floor(progress.percent);
                           })
                           .save(path.join(__dirname, '../common/output',parameters.name))  
                           .on('end', function() {
                             self.percent = 100;
                             self.status = 'DONE';
+                            self.endTime = new Date();
                           }) 
                           .on('error', function(err, stdout, stderr) {
                             self.percent = 100;
