@@ -116,9 +116,10 @@
                         <input type="text" class="form-control" id="NameProfil">
                         <label for="Format">Résolution :</label>
                         <select class="form-control" id="Format" placeholder="Résolution">
-                            <option>3840x2160</option>
-                            <option>1920x1080</option>
-                            <option>1280x720</option>
+                            <option value="same">Same As Source</option>
+                            <option value="3840x2160">3840x2160</option>
+                            <option value="1920x1080">1920x1080</option>
+                            <option value="1280x720">1280x720</option>
                         </select>
                         <label for="vCodec">Codec vidéo :</label>
                         <select class="form-control" id="vCodec" placeholder="Codec Video">
@@ -132,10 +133,11 @@
                         </select>
                         <label for="FrameRate">Nombre d'images :</label>
                         <select class="form-control" id="FrameRate" placeholder="FrameRate">
-                            <option>60p</option>
-                            <option>50p</option>
-                            <option>30p</option>
-                            <option>25p</option>
+                            <option value="same">Same As Source</option>
+                            <option value="60p">60p</option>
+                            <option value="50p">50p</option>
+                            <option value="30p">30p</option>
+                            <option value="25p">25p</option>
                         </select>
                         <label for="WPP">Activer le WPP :</label>
                         <select class="form-control" id="WPP" placeholder="WPP">
