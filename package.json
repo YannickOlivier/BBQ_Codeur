@@ -8,6 +8,7 @@
     "start": "server/bbq.exe",
     "install": "node server/install.js",
     "unistall": "node server/unistall.js",
+    "compile": "nexe",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
