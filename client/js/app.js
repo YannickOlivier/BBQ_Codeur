@@ -85,9 +85,6 @@ jQuery(function ($) {
     // Shutdown du serveur
     $(document).on('click', '#Shutdown', function() {
         console.log('Shutdown du serveur');
-        socket.emit('test', {
-          test: 'shutdown'
-        });
         socket.emit('shutdown', {
           shutdown: true
         });
@@ -103,8 +100,9 @@ jQuery(function ($) {
 
     // Arrêt du serveur
     socket.on('shutdown', function(profile) {
+      socket.disconnect(true);
       console.log('Shutdown coté serveur');
-      confirm("Le serveur vient de s'arrêter");
+      alert("Le serveur vient de s'arrêter");
     });
 
     // Mise à jour des profils
@@ -167,13 +165,20 @@ jQuery(function ($) {
                           <div class="progress flexboxbig flexboxmargin flexboxprogress"> \
                               <div id="progress'+id+'" class="progress-bar progress-bar-striped active progress-bar-'+colored+' flexboxprogress" role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100" style="width:'+percent+'%">'+percent+'%</div> \
                           </div>\
-                          <p id="status'+id+'" class="btn btn-sm btn-'+colored+' flexboxmargin" data-toggle="popover" data-content="'+status+'">'+status+'</p> \
-                          <a id="download'+id+'" class="btn btn-default btndl flexboxmargin '+disabled_button+'" role="button" href="download/'+name+'" download>Télécharger</a> \
+                          <p id="status'+id+'" data-selected="false" data-id="'+id+'" class="status btn btn-sm btn-'+colored+' flexboxmargin" data-toggle="popover" data-content="'+status+'">'+status+'</p> \
+                          <a id="download'+id+'" class="btn btn-default btndl flexboxmargin'+disabled_button+'" role="button" href="download/'+name+'" download>Télécharger</a> \
                         </div>';
+        if(status == 'DONE'){
+          template += '<div id="stats'+id+'" class="flexbox"> \
+                        <p class="flexboxsmall flexboxmargin" style="width: 800px;text-align: left">Stats :  Encodé en '+monitoring[i].encodingTime+'    Global PSNR: '+monitoring[i].globalPSNR+'  <p>\
+                        <a id="downloadStats'+id+'" class="btn btn-default btndl flexboxmargin'+disabled_button+'" role="button" href="download/'+name+'.yaml" download>Télécharger les Stats</a> \
+                       </div>';
+        }
         $(template).appendTo('#monitoring');
       }
     });
 });
+
 
 
 //deleteprofil name jquerry
