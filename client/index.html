@@ -15,131 +15,144 @@
 
 
 </head>
+
 <body>
-  <div class="container">
-      <div class="header">
-          <h1 class="text-muted">Transnodeur V1.0</h1>
-      </div>
-      <div class="row">
-          <div class="col-sd-3 col-md-3">
-            <div class="panel-group" id="accordion">
-              <div class="panel panel-default">
-                  <div class="panel-heading">
-                      <h4 class="panel-title">
-                          <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne"><span class="glyphicon glyphicon-facetime-video">
+    <div class="container">
+        <div class="header">
+            <h1 class="text-muted">Transnodeur V1.0</h1>
+        </div>
+        <div class="row">
+            <div class="col-sd-3 col-md-3">
+                <div class="panel-group" id="accordion">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne"><span class="glyphicon glyphicon-facetime-video">
                           </span>Encoding</a>
-                      </h4>
-                  </div>
-                  <script type="text/javascript">
-                    jQuery(function ($) {
-                        $('#inputbtn').click(function(e){
-                            e.preventDefault();
-                            $('#inputPage').show();
-                            $('#monitoringTitle').hide();
-                        })
-                        $('#outputbtn').click(function(e){
-                            e.preventDefault();
-                            $('#monitoringTitle').show();
-                            $('#inputPage').hide();
-                        })
-                    });
-                  </script>
-                  <div id="collapseOne" class="panel-collapse collapse in">
-                      <div class="panel-body">
-                          <table class="table">
-                              <tr>
-                                  <td>
-                                      <span class="glyphicon glyphicon-upload text-primary"></span><a id="inputbtn" href="#">Inputs</a>
-                                  </td>
-                              </tr>
-                              <tr>
-                                  <td>
-                                      <span class="glyphicon glyphicon-download text-success"></span><a id="outputbtn" href="#">Outputs</a>
-                                  </td>
-                              </tr>
-                              <tr>
-                                  <td>
-                                      <span class="glyphicon glyphicon-file text-info"></span><a href="profiles.html">Profiles</a>
-                                      <span class="badge" id="nbrProfile">0</span>
-                                  </td>
-                              </tr>
-                              <tr>
-                                  <td>
-                                      <span class="glyphicon glyphicon-comment text-success"></span><a href="index.html">Statistics</a>
-                                  </td>
-                              </tr>
-                          </table>
-                      </div>
-                  </div>
-              </div>
-              <div class="panel panel-default">
-                  <div class="panel-heading">
-                      <h4 class="panel-title">
-                          <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo"><span class="glyphicon glyphicon-th">
+                            </h4>
+                        </div>
+                        <script type="text/javascript">
+                            jQuery(function ($) {
+                                $('#inputbtn').click(function (e) {
+                                    e.preventDefault();
+                                    $('#inputPage').show();
+                                    $('#monitoringTitle').hide();
+                                })
+                                $('#outputbtn').click(function (e) {
+                                    e.preventDefault();
+                                    $('#monitoringTitle').show();
+                                    $('#inputPage').hide();
+                                })
+                            });
+                        </script>
+                        <div id="collapseOne" class="panel-collapse collapse in">
+                            <div class="panel-body">
+                                <table class="table">
+                                    <tr>
+                                        <td>
+                                            <span class="glyphicon glyphicon-upload text-primary"></span><a id="inputbtn"
+                                                href="#">Inputs</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="glyphicon glyphicon-download text-success"></span><a id="outputbtn"
+                                                href="#">Outputs</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="glyphicon glyphicon-file text-info"></span><a href="profiles.html">Profiles</a>
+                                            <span class="badge" id="nbrProfile">0</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="glyphicon glyphicon-comment text-success"></span><a href="index.html">Statistics</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo"><span class="glyphicon glyphicon-th">
                           </span>Administration</a>
-                      </h4>
-                  </div>
-                  <div id="collapseTwo" class="panel-collapse collapse">
-                      <div class="panel-body">
-                          <table class="table">
-                              <tr>
-                                  <td>
-                                      <span class="glyphicon glyphicon-signal text-info"></span><a href="index.html">Status</a>
-                                  </td>
-                              </tr>
-                              <tr>
-                                  <td>
-                                      <span class="glyphicon glyphicon-retweet text-info"></span><a href="shutdown.html">Reboot</a>
-                                  </td>
-                              </tr>
-                          </table>
-                      </div>
-                  </div>
-              </div>
-          </div>
-          </div>
-          <div class="col-sm-9 col-md-9">
-              <div class="corpsBottom" id="inputPage">
-                <h3> Interface de transcodage </h3>
-                <br>
-
-
-                <div class"form-group">
-                    <label for="InputFile">Choix des fichiers à transcoder :</label>
-                    <input type="file" name="uploads[]"  id="inputFiles">
+                            </h4>
+                        </div>
+                        <div id="collapseTwo" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <table class="table">
+                                    <tr>
+                                        <td>
+                                            <span class="glyphicon glyphicon-signal text-info"></span><a href="index.html">Status</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="glyphicon glyphicon-retweet text-info"></span><a href="shutdown.html">Reboot</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <br>
-                    <div class"form-group">
+            </div>
+            <div class="col-sm-9 col-md-9">
+                <div class="corpsBottom" id="inputPage">
+                    <h3> Interface de transcodage </h3>
+                    <br>
+
+
+                    <div class "form-group">
+                        <label for="InputFile">Choix des fichiers à transcoder :</label>
+                        <input type="file" name="uploads[]" id="inputFiles">
+                    </div>
+                    <br>
+                    <div class "form-group">
                         <label for="listProfil">Choix du profil de conversion :</label>
                         <select class="form-control" placeholder="Choix du profil" id="listProfil">
                         </select>
                     </div>
-                </form>
-                <br>
-                <p>Cliquer sur le bouton pour lancer le transcodage<p>
-              <div class"forme-group">
-                <button id="Transcode" type="submit" class"Transcode btn btn-default">Transcode</button>
-              </div>
-              </div>
-    <div id="monitoringTitle" class="col-sd-12 col-md-12" style="display:none">
-    <div class="corpsTop">
-        <div class="row">
-            <div class="col-sd-9 col-md-9">
-                <h3> Etat des transcodes : </h3>
-            </div>
-            <div class="col-sd-3 col-md-3">
-                <button id="clearMonitoring" type="button" class="btn btn-warning btn-margin">Clear</button>
-            </div>
-        </div>
-    </div>
-    <div class="corpsBottom" id="monitoring" ></div>
+                    </form>
+                    <br>
+                    <p>Cliquer sur le bouton pour lancer le transcodage<p>
+                    <div class "forme-group">
+                        <button id="Transcode" type="submit" class "Transcode btn btn-default">Transcode</button>
+                    </div>
+                                        <br>
+                    <p>Entrer le nom du watch folder à créer / modifier<p>
+                    <div class "forme-group">
+                        <input type="text" class="form-control" id="nameWatchfolder">
+                    </div>
+                </div>
 
-    </div>
-    <div class="footer">
-      <h5> Réalisé par Julien et Yannick : projet de fin de première année - ENSEA/INA </h5>
-    </div>
-    </div>
-    <script src="public/js/app.js"></script>
-    <script src="public/js/upload.js"></script>
-  </body>
+
+
+
+                <div id="monitoringTitle" class="col-sd-12 col-md-12" style="display:none">
+                    <div class="corpsTop">
+                        <div class="row">
+                            <div class="col-sd-9 col-md-9">
+                                <h3> Etat des transcodes : </h3>
+                            </div>
+                            <div class="col-sd-3 col-md-3">
+                                <button id="clearMonitoring" type="button" class="btn btn-warning btn-margin">Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="corpsBottom" id="monitoring"></div>
+
+                </div>
+                <div class="footer">
+                    <h5> Réalisé par Julien et Yannick : projet de fin de première année - ENSEA/INA </h5>
+                </div>
+            </div>
+            <script src="public/js/app.js"></script>
+            <script src="public/js/upload.js"></script>
+</body>
+
 </html>

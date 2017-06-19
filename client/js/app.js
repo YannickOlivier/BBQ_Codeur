@@ -19,6 +19,11 @@ jQuery(function ($) {
         $('#vCodec').val(bbq.profile[profilName].vCodec);
         $('#aCodec').val(bbq.profile[profilName].aCodec);
         $('#FrameRate').val(bbq.profile[profilName].FrameRate);
+        $('#vDebit').val(bbq.profile[profilName].vDebit);
+        $('#vGOP').val(bbq.profile[profilName].vGOP);
+        $('#vQP').val(bbq.profile[profilName].vQP);
+        $('#aDebit').val(bbq.profile[profilName].aDebit);
+        $('#preset').val(bbq.profile[profilName].preset);
         $('#WPP').val(bbq.profile[profilName].WPP);
     }
 
@@ -40,15 +45,24 @@ jQuery(function ($) {
 
     // On emit via Socket des objects, après click sur updateProfile
     $(document).on('click', '#SaveProfil', function() {
-        console.log('Requête de modification du profil')
-        socket.emit('updateProfile', {
+        var profile = {
           name:$('#NameProfil').val(),
           Format:$('#Format').val(),
           vCodec:$('#vCodec').val(),
+          vDebit:$('#vDebit').val(),
+          vGOP:$('#vGOP').val(),
+          vQP:$('#vQP').val(),
+          vCTU:$('#vCTU').val(),
+          aDebit:$('#aDebit').val(),
           aCodec:$('#aCodec').val(),
           FrameRate:$('#FrameRate').val(),
+          preset: $('#profilePreset').val(),
           WPP:$('#WPP').val(),
-        });
+        };
+        console.log('preset '+profile.preset)
+        console.log('Requête de modification du profil ');
+        console.log(JSON.stringify(profile));
+        socket.emit('updateProfile', profile);
     });
 
     // Suppression d'un profil

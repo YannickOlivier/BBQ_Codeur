@@ -1,22 +1,28 @@
-//var EventLogger = require('node-windows').EventLogger;
-var express = require('express');
-var formidable = require('formidable');
-var app = express();
-var server = require('http').createServer(app);
-var io = require('socket.io')(server);
-var path = require('path');
-var fs = require('fs');
-var os = require('os');
-var ffmpeg = require('fluent-ffmpeg');
-var crypto = require('crypto');
-var CronJob = require('cron').CronJob;
-ffmpeg.setFfmpegPath(path.join(__dirname, '../common/bin/ffmpeg.exe'));
-ffmpeg.setFfprobePath(path.join(__dirname, '../common/bin/ffprobe.exe'));
-/*var WatchIO = require('watch.io'),
-  watcher = new WatchIO(); */
+'use strict';
 
+const debugMod = true;
+
+const express = require('express');
+const formidable = require('formidable');
+const app = express();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+const path = require('path');
+const fs = require('fs');
+const os = require('os');
+const CronJob = require('cron').CronJob;
+const ffmpeg = require('fluent-ffmpeg');
+const crypto = require('crypto');
+const chokidar = require('chokidar');
 // LOG 
-var colors = {
+
+const globalPSNRegex = /Global PSNR: [0-9]{1,2}.[0-9]{1,3}/g;
+const IPSNRRegex = /PSNR Mean: Y:[0-9]{1,2}.[0-9]{1,3} U:[0-9]{1,2}.[0-9]{1,3} V:[0-9]{1,2}.[0-9]{1,3}/g;
+const IRegex = /frame I:/;
+const PRegex = /frame P:/;
+const BRegex = /frame B:/;
+
+const colors = {
  Reset: "\x1b[0m",
  Bright: "\x1b[1m",
  Dim: "\x1b[oad2m",
@@ -48,10 +54,10 @@ var colors = {
  }
 };
 var jobs = {};
+const watchfolderJobs = {};
 var monitoring = {};
-var serverStartTime = new Date();
+const serverStartTime = new Date();
 var alarms = {};
-//var windowsLog = new EventLogger('BBQ_Codeur');
 
 function dateLog () {
   var date = new Date();
@@ -74,8 +80,8 @@ function getLogFileName(){
   var now = new Date();
   return ''+path.join(__dirname, '../common/tmp/log','log-' +("0" + now.getDate()).slice(-2) + '-' + ("0" + (now.getMonth()+1)).slice(-2) + '-' + now.getFullYear()+'.log');
 }
-var LogError = function(text){ 
-  console.error(colors.fg.Red + dateLog() + 'ERROR   ' + text); 
+const LogError = function(text){ 
+  console.error(colors.fg.Magenta + dateLog() + 'ERROR   ' + text); 
   //windowsLog.error('ERROR   ' + text);
   fs.appendFile(getLogFileName(), (dateLog() + 'ERROR   ' + text+'\r\n'), {
     encoding: 'utf8',
@@ -86,14 +92,14 @@ var LogError = function(text){
       console.log('ERROR logError '+err);      
   });
 };
-var LogInfo = function(text){ 
+const LogInfo = function(text){ 
   console.log(colors.fg.White + dateLog() + 'INFO   ' + text); 
   fs.appendFile(getLogFileName(), (dateLog() + 'INFO   ' + text+'\r\n'), function(err){
     if(err)
       console.log('ERROR logInfo '+err);
   });
 };
-var LogWarning = function(text){ 
+const LogWarning = function(text){ 
   console.log(colors.fg.Yellow + dateLog() + 'WARNING   ' + text); 
   //windowsLog.warn('WARNING   ' + text);
   fs.appendFile(getLogFileName(), (dateLog() + 'WARNING  ' + text+'\r\n'), function(err){
@@ -101,7 +107,7 @@ var LogWarning = function(text){
       console.log('ERROR logWarning '+err);      
   });
 };
-var LogWorkflow = function(text) { 
+const LogWorkflow = function(text) { 
   console.log(colors.fg.Cyan + dateLog() + 'WORKFLOW   ' + text); 
   fs.appendFile(getLogFileName(), (dateLog() + 'WORKFLOW  ' + text+'\r\n'), {
     encoding: 'utf8',
@@ -112,6 +118,9 @@ var LogWorkflow = function(text) {
       console.log('ERROR logWorkflow '+err);      
   });
 };
+
+if(debugMod)
+  LogWarning('!!!  DEBUG MODE ON  !!!');
 
 //HTTP / WS Section
 app.use('/public', express.static(path.join(__dirname, '../client'), {
@@ -126,7 +135,9 @@ app.get('/shutdown.html', (req, res) => { res.sendFile(path.join(__dirname, '../
 app.get('/output.html', (req, res) => { res.sendFile(path.join(__dirname, '../client/output.html')); });
 app.get('/download/:fileName', (req, res) => {
   try{
-    var fileName = req.params.fileName;
+    if(debugMod)
+      LogWorkflow(`Download ${req.params.fileName} requested by ID: ${socket.id}`);
+    const fileName = req.params.fileName;
     res.download(path.join(__dirname, '../common/output', fileName), fileName, function(err){
       if (err) {
         LogError('Downloading File! ' + err);
@@ -148,6 +159,8 @@ app.post('/upload', (req, res) => {
 
 io.sockets.on('connection', (socket) => {
   socket.on('job', (job) =>{
+    if(debugMod)
+      LogWorkflow(`new job sended by ID: ${socket.id}`);
     switch(job.type){
       case 'new':
         newJob(job.parameters);
@@ -161,7 +174,10 @@ io.sockets.on('connection', (socket) => {
   });
 
   socket.on('getProfile', (request) => {
-    LogInfo('Get All Profile request');
+    if(debugMod)
+      LogInfo(`get All profile requested by ID: ${socket.id}`);
+    else
+      LogInfo('Get All Profile request');
     try{
       fs.readFile((path.join(__dirname, '../common/profiles/bbq.profile')), (err, data) => {
         if(err){
@@ -180,17 +196,23 @@ io.sockets.on('connection', (socket) => {
   });
 
   socket.on('updateProfile', (request) => {
-    LogInfo('Update Profile');
+     if(debugMod)
+      LogInfo(`Update profile required by ID: ${socket.id}`);
+    else
+      LogInfo('Update Profile');
     try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; LogError(e.message);}
     profile[request.name] = request;
-    tempString = JSON.stringify(profile);
+    var tempString = JSON.stringify(profile);
     fs.writeFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), tempString);
     io.local.emit('profile', profile);
     return;
   });
 
   socket.on('deleteProfile', (request) => {
-    LogInfo('Delete Profile: '+request.name);
+    if(debugMod)
+      LogInfo(`Delete profile requested by ID: ${socket.id}`);   
+   else
+      LogInfo('Delete Profile: '+request.name);
     try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; LogError(+e.message);}
     delete(profile[request.name]);
     tempString = JSON.stringify(profile);
@@ -200,7 +222,10 @@ io.sockets.on('connection', (socket) => {
   });
 
   socket.on('shutdown', (request) =>{
-    LogWarning('Shutdown request !!');
+    if(debugMod)
+      LogWarning(`Shutdown requested by ID: ${socket.id}`);
+    else
+      LogWarning('Shutdown request !!');
     for(var i in jobs){
       cancelWFJob(i);
     }
@@ -213,10 +238,7 @@ io.sockets.on('connection', (socket) => {
       process.exit(0);
     }, 1000);
   });
-  socket.on('test', (request) => {
-    LogWarning('TEST: '+request.test);
-  });
-
+  
   socket.on('getMonitoring', (request) => {
     LogInfo('Get monitoring Request');
     socket.emit('monitoring', monitoring);
@@ -228,10 +250,18 @@ io.sockets.on('connection', (socket) => {
     updateMonitoring();
   });
 
-  LogWorkflow('New user connected');
+  socket.on('watchfolder', request => {
+    if(debugMod)
+      LogWorkflow(`New watchfolder creation requested by ID: ${socket.id}`);
+    else
+      LogWorkflow('New watchfolder creation requested');
+    watchfolderJobs = new Watchfolder(request.folder, request.profileName);
+  });
+
+  LogWorkflow(`New user connected ID: ${socket.id}`);
 });
 
-var Upload = function(req, res, jobID){
+const Upload = function(req, res, jobID){
   var self = this;
   try{
     self.id = jobID;
@@ -266,6 +296,8 @@ var Upload = function(req, res, jobID){
 
     form.on('progress', function(bytesReceived, bytesExpected) {
       self.percent = Math.round((bytesReceived/bytesExpected)*100);
+      if(debugMod)
+        LogWorkflow(`Uploading ${self.name} : ${self.percent}`);
     });
 
     //On récupere le nom du profile
@@ -292,7 +324,7 @@ var Upload = function(req, res, jobID){
       fs.exists(path.join(form.uploadDir, self.name), function(exists){
         if(exists){
           var ext = path.extname(self.name);
-          fileName = '' + path.basename(self.name, ext)  + '-' + crypto.randomBytes(6).toString('hex') + ext;
+          const fileName = '' + path.basename(self.name, ext)  + '-' + crypto.randomBytes(6).toString('hex') + ext;
           fs.rename(self.uploadPath, path.join(form.uploadDir, fileName), function(){
             parameters.path = path.join(form.uploadDir, fileName);
             parameters.name = fileName;
@@ -341,7 +373,7 @@ try{
   }, null, true); 
 } catch(e){ LogError('On routine '+e.message); }
 
-var updateMonitoring = function(){
+const updateMonitoring = function(){
   try{
     for(var i in jobs){
       if(!monitoring[i]){
@@ -390,7 +422,7 @@ var updateMonitoring = function(){
   } catch(e) { LogError('In monitoring construction: '+e.message); }
 
 };
-var updateServerStatus = function(){
+const updateServerStatus = function(){
   try{
     var serverStatus = {
       'uptime': Math.floor(process.uptime()),
@@ -410,7 +442,7 @@ var updateServerStatus = function(){
   } catch(e){ LogError('Updating ServerStatus: '+e.message); }
 };
 
-var getCPUNumber = function (){
+const getCPUNumber = function (){
   try{
     var cpus = os.cpus();
     var cpuNumber = 0;
@@ -424,24 +456,6 @@ var getCPUNumber = function (){
   }
 };
 
-//Job Section
-/*watcher.watch(path.join(__dirname, '../common/tmp')); //WatchFolder !!! A metre dans une fonction pour gestion depuis interface
-
-watcher.on('create', function ( file, stat ) {
-    LogInfo('New file cregggated: '+file+' - '+JSON.stringify(stat));
-    //newJob({ path: file });
-}); */
-
-/*fs.watch(path.join(__dirname, '../common/tmp'), (eventType, filename) => {
-  LogInfo(filename+ '   '+eventType);
-  if(filename){
-    LogInfo(path.join(__dirname, '../common/tmp/',filename));
-
-  }
-}); */
-
-
-
 var newWFJob = function (parameters) {
   try{
     var jobID = crypto.randomBytes(32).toString('hex');
@@ -453,14 +467,14 @@ var newWFJob = function (parameters) {
   return;
 };
 
-var cancelWFJob = function(id){
+const cancelWFJob = function(id){
   try{
     if(jobs[id]){
       if(jobs[id].status == 'Upload'){
         jobs[id].stopUpload('Abord');
       }
       if(jobs[id].status == 'Transcode'){
-        jobs[id].ffmpegProcess.kill('SIGKILL');
+        jobs[id].ffmpegProcess.kill();
         jobs[id].status = 'STOP';
         LogWorkflow('Job '+ id + 'Killed');
       }
@@ -477,7 +491,61 @@ var cancelWFJob = function(id){
   } catch(e) {LogError('Cancel Job : '+e.message); }
 };
 
+/* Maison Fonctionne pas
 var BBQJob = function (jobID, parameters) {
+  var self = this;
+  try{
+    self.id = jobID;
+    self.percent = '0';
+    self.name = parameters.name;
+    self.status = 'Transcode';
+    const profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile')))[parameters.profile];
+    self.profile = profile;
+    self.startTime = new Date();
+    const ffmpegParameters = {
+      input: parameters.path,
+      output: path.join(__dirname, '../common/output',parameters.name),
+      profile: profile,
+      name: parameters.name,
+      jobID: jobID
+    };
+
+    self.ffmpegProcess = new FFmpegProcess()
+                      .on('start', function(commandLine) {
+                        LogWorkflow(`Spawned FFmpeg process with command: ${commandLine}`);
+                      })
+                      .on('progress', function(progress) {
+                        //LogInfo('Processing: ' + progress.percent + ' % done');
+                        self.percent = Math.floor(progress.percent);
+                      })
+                      .on('end', function() {
+                        self.percent = 100;
+                        self.status = 'DONE';
+                        self.endTime = new Date();
+                        self.executionTime = self.endTime - self.startTime;
+                        LogWorkflow(`${self.name} was successfully INGESTED in ${self.executionTime}`);
+                      }) 
+                      .on('err', function(err) {
+                        LogError(`FFMPEG ERROR on ${parameters.name} : ${err}`);
+                        self.percent = 100;
+                        self.status = 'ERROR';
+                      })
+                      .on('test', (text) =>{
+                        LogWorkflow(`Test listener function: ${text}`);
+                      });
+
+    self.ffmpegProcess.lunchFFmpegTask(ffmpegParameters);                
+    LogWorkflow('Transcode: ' + parameters.name);
+  }
+  catch(e){
+    LogError('During transcode: '+e.message);
+    self.percent = 100;
+    self.status = 'ERROR';
+  }
+};*/
+
+
+const BBQJob = function (jobID, parameters) {
   var self = this;
   try{
     self.id = jobID;
@@ -502,11 +570,15 @@ var BBQJob = function (jobID, parameters) {
 
     try{
       var customOptions = [];
-      var customComplexFilter = [];
-      var customVideoFilter = [];
+      var  x265params = []; 
+
+      if(profile.vGOP)
+        customOptions.push('-g '+profile.vGOP);
+
+      customOptions.push(`-c:v ${vCodec}`);
 
       if(!profile.Format === 'same')
-        customVideoFilter.push('scale='+profile.Format)
+        customVideoFilter.push('scale='+profile.Format);
 
       if(!profile.FrameRate === 'same')
         customOptions.push('-r '+profile.FrameRate);
@@ -514,32 +586,45 @@ var BBQJob = function (jobID, parameters) {
       if(profile.vDebit)
         customOptions.push('-b:v ' + profile.vDebit + 'k'); 
 
-      if(profile.vGOP)
-        customOptions.push('-g '+profile.vGOP);
+
+      if(profile.WPP === 'Oui')
+        x265params.push('wpp=1');
+
+      if(profile.vCTU)
+        x265params.push(`ctu=${profile.vCTU}`);
 
       if(profile.vQP)
-        customOptions.push('-crf '+profile.vQP);
+        x265params.push(`qp=${profile.vQP}`);
 
-      if(profile.WPP)
-       // customComplexFilter.push('wpp');
-      
+      if(x265params.length > 0){
+        let string = '-x265-params ';
+        if(x265params.length  === 1)
+          string += ''+x265params[0];
+        else{
+          string += ''+x265params[0];
+          for(let i = 1; i<x265params.length; i++)
+            string += ':'+x265params[i];          
+        }
+        customOptions.push(string);
+      }
+
       if(profile.Lossless)
         customOptions.push('--lossless');
+
+      if(profile.preset != 'none' && profile.preset)
+        customOptions.push(`-preset ${profile.preset}`);
 
       customOptions.push('-psnr');
     }
     catch(e){
-      LogError('Pushing Custom parameters String for: '+self.name);
+      LogError(`Pushing Custom parameters String for: ${self.name}: ${e.message}`);
     }
     self.ffmpegProcess = ffmpeg(parameters.path)
-                          .videoCodec(vCodec)
                           .audioCodec(profile.aCodec == 'AAC' ? 'aac': 'pcm_s16le')
                           .audioBitrate(profile.aDebit ? profile.aDebit: '48000k')
-                          .inputOption(customOptions)
-                          //.complexFilter(customComplexFilter)
-                          .videoFilter(customVideoFilter)
+                          .outputOption(customOptions)
                           .on('start', function(commandLine) {
-                            LogWorkflow('Spawned Ffmpeg with command: ' + commandLine);
+                            LogWorkflow(`Spawned Ffmpeg with command: ${commandLine} with profile: ${parameters.profile}`);
                           })
                           .on('progress', function(progress) {
                             //LogInfo('Processing: ' + progress.percent + ' % done');
@@ -552,16 +637,23 @@ var BBQJob = function (jobID, parameters) {
                             self.percent = 100;
                             self.status = 'DONE';
                             self.endTime = new Date();
-                            self.executionTime = self.startTime - self.endTime;
-                            LogWorkflow(sef.name + 'was successfully INGESTED');
+                            self.executionTime = self.endTime - self.startTime;
+                            LogWorkflow(`${self.name} was successfully INGESTED in ${ self.executionTime}`);
                           }) 
                           .on('error', function(err, stdout, stderr) {
-                            LogError('FFMPEG ERROR on '+parameters.name+' : '+err);
+                            let killedRegex = /SIGKILL/g;
+                            LogError(`FFMPEG ERROR on ${parameters.name} : ${err}`);
                             self.percent = 100;
-                            self.status = 'ERROR';
+                            if(killedRegex.exec(err) == null)
+                              self.status = 'ERROR';
                           })  
+                          .on('stdout', (stdoutLine) =>{
+                            if(debugMod)
+                              LogWorkflow(`Stdout line ${stdoutLine}`);
+                          })
                           .on('stderr', function(stderrLine) {
-                            //LogError('Stderr output: ' + stderrLine);
+                          if(debugMod)
+                              LogError(`Stderr line ${stderrLine}`);
                           });
     LogWorkflow('Transcode: ' + parameters.name);
   }
@@ -572,18 +664,41 @@ var BBQJob = function (jobID, parameters) {
   }
 };
 
+class Watchfolder {
+  constructor(folder, profileName){
+    try{
+      this.profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile')))[profileName];
+    } catch(e) {}
+    this.watchfolderDirectory = path.join(__dirname, '../common/watchfolder', folder);
+    fs.mkdirSync(this.watchfolderDirectory)
+    this.watchfolder = chokidar.watch(this.watchfolderDirectory, {
+      ignored: /(^|[\/\\])\../,
+      awaitWriteFinish: {
+        stabilityThreshold: 6000,
+        pollInterval: 100
+      },
+    })
+    .on("add", path => {
+      newWFJob({
+        path: path,
+        name: path.basename(path) + path.extname(path),
+        profile: this.profile
+      });
+    });
+  }
+}
 
-try{ server.listen(8080); } catch(e){ LogError('Starting server '+e.message); }
+
+try{ server.listen(8080); LogWarning('Sever started and listen on port 8080'); } catch(e){ LogError('Starting server '+e.message); }
 
 process.on('exit', (code) => {
 		LogInfo('Exit code: '+code);
 });
 
+
 process.on('uncaughtException', (err) =>{
   var errorID = crypto.randomBytes(32).toString('hex');
   alarms[errorID] = err;
-  LogError('FATAL ERROR!!: '+err);
+  LogError(`FATAL ERROR!!: ${err}`);
 	//process.exit(1);
 });
-
-LogWarning('Sever started');

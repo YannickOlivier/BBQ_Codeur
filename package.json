@@ -22,13 +22,14 @@
   },
   "homepage": "https://github.com/YannickOlivier/BBQ_Codeur#readme",
   "dependencies": {
+    "byline": "^5.0.0",
     "cron": "^1.2.1",
     "express": "^4.15.2",
     "fluent-ffmpeg": "^2.1.2",
     "formidable": "^1.1.1",
-    "nodemon": "^1.11.0",
     "os-service": "^1.4.1",
-    "socket.io": "^1.7.3"
+    "socket.io": "^1.7.3",
+    "split": "^1.0.0"
   },
   "nexe": {
     "input": "./server/index.js",
@@ -40,5 +41,10 @@
       "js-flags": "--use_strict",
       "ignoreFlags": true
     }
+  },
+  "devDependencies": {
+    "electron-packager": "^8.7.1",
+    "node-windows": "^0.1.14",
+    "nodemon": "^1.11.0"
   }
 }
