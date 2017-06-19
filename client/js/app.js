@@ -177,6 +177,11 @@ jQuery(function ($) {
         $(template).appendTo('#monitoring');
       }
     });
+
+    socket.emit('watchfolder', {
+      folder: 'test',
+      profileName: 'HEVC SAS ultrafast ctu 16'
+    })
 });
 
 

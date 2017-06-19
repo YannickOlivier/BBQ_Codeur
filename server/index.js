@@ -131,7 +131,7 @@ const debugMod = true;
         executionTimeMS: jobs[id].executionTime+'ms',
         executionTimeSecondes: Math.round((jobs[id].executionTime * 100) / 60) / 100 +'s',
         psnr:{
-          global: jobs[id].globalPSNR,
+          globalPSNR: jobs[id].globalPSNR,
           iPSNR: jobs[id].iPSNR,
           pPSNR: jobs[id].pPSNR,
           bPSNR: jobs[id].bPSNR
@@ -286,7 +286,9 @@ if(debugMod)
         LogWorkflow(`New watchfolder creation requested by ID: ${socket.id}`);
       else
         LogWorkflow('New watchfolder creation requested');
-      watchfolderJobs = new Watchfolder(request.folder, request.profileName);
+
+      createWatchFolder(request.folder, request.profileName);
+      return;
     });
 
     LogWorkflow(`New user connected ID: ${socket.id}`);
@@ -492,7 +494,7 @@ const getCPUNumber = function (){
 
 var newWFJob = function (parameters) {
   try{
-    var jobID = crypto.randomBytes(32).toString('hex');
+    let jobID = crypto.randomBytes(32).toString('hex');
     jobs[jobID] = new BBQJob(jobID, parameters);
   }
   catch(e){
@@ -574,6 +576,22 @@ const cancelWFJob = function(id){
     
     updateMonitoring();
   } catch(e) {LogError('Cancel Job : '+e.message); }
+};
+
+const createWatchFolder = function(folder, profileName){
+  try{
+    let id = crypto.randomBytes(32).toString('hex');
+    let alreadyExist = false;
+    for(let i in watchfolderJobs)
+      if(watchfolderJobs[i].folder == folder)
+        alreadyExist = true;
+    
+    if(!alreadyExist) 
+      watchfolderJobs[id] = new Watchfolder(folder, profileName);
+  }
+  catch(e){
+    LogError(`Failed to create Watchfolder ${e.message}`);
+  }
 };
 
 const BBQJob = function (jobID, parameters) {
@@ -706,10 +724,14 @@ const BBQJob = function (jobID, parameters) {
 class Watchfolder {
   constructor(folder, profileName){
     try{
-      this.profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile')))[profileName];
+      this.profile = profileName;
     } catch(e) {}
+    this.folder = folder;
     this.watchfolderDirectory = path.join(__dirname, '../common/watchfolder', folder);
-    fs.mkdirSync(this.watchfolderDirectory)
+    if(!fs.existsSync(this.watchfolderDirectory))
+      fs.mkdirSync(this.watchfolderDirectory)
+
+    LogWorkflow(`New Watchfolder created : ${folder} whith profile : ${profileName}`);
     this.watchfolder = chokidar.watch(this.watchfolderDirectory, {
       ignored: /(^|[\/\\])\../,
       awaitWriteFinish: {
@@ -717,10 +739,10 @@ class Watchfolder {
         pollInterval: 100
       },
     })
-    .on("add", path => {
+    .on("add", filePath => {
       newWFJob({
-        path: path,
-        name: path.basename(path) + path.extname(path),
+        path: filePath,
+        name: path.basename(filePath) + path.extname(filePath),
         profile: this.profile
       });
     });
