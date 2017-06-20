@@ -252,7 +252,7 @@ if(debugMod)
         LogInfo('Delete Profile: '+request.name);
       try { var profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), 'utf8')); } catch(e) { var profile = {}; LogError(+e.message);}
       delete(profile[request.name]);
-      tempString = JSON.stringify(profile);
+      var tempString = JSON.stringify(profile);
       fs.writeFileSync(path.join(__dirname, '../common/profiles/bbq.profile'), tempString);
       io.local.emit('profile', profile);
       return;
@@ -749,7 +749,8 @@ class Watchfolder {
       newWFJob({
         path: filePath,
         name: path.basename(filePath) + path.extname(filePath),
-        profile: this.profile
+        profile: this.profile,
+        source: `Watchfolder: ${folder}`
       });
     });
   }
