@@ -306,7 +306,7 @@ ffmpeg.setFfmpegPath(path.join(__dirname, '../common/bin/ffmpeg.exe'));
   });
 
   const Upload = function(req, res, jobID){
-    var self = this;
+    const self = this;
     try{
       self.id = jobID;
       self.name ='Waiting ...';
@@ -420,7 +420,7 @@ try{
 
 const updateMonitoring = function(){
   try{
-    for(var i in jobs){
+    for(let i in jobs){
       if(!monitoring[i]){
           monitoring[i] = {
             name: jobs[i].name,
@@ -608,6 +608,7 @@ const createWatchFolder = function(folder, profileName){
 const BBQJob = function (jobID, parameters) {
   var self = this;
   try{
+    self.parameters = parameters;
     self.source = parameters.source;
     self.id = jobID;
     self.percent = '0';
