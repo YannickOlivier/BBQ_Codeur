@@ -133,6 +133,9 @@ let debugMod = false;
         inputPath: jobs[id].path,
         duration: jobs[id].duration
       },
+      job: {
+        commandLine: jobs[id].commandLine
+      },
       stats:{
         executionTimeMS: jobs[id].executionTime+'ms',
         executionTimeSecondes: Math.round((jobs[id].executionTime * 100) / 60) / 100 +'s',
@@ -685,6 +688,7 @@ const BBQJob = function (jobID, parameters) {
                           .outputOption(customOptions)
                           .on('start', function(commandLine) {
                             LogWorkflow(`Spawned Ffmpeg with command: ${commandLine} with profile: ${parameters.profile}`);
+                            self.commandLine = commandLine;
                           })
                           .on('progress', function(progress) {
                             //LogInfo('Processing: ' + progress.percent + ' % done');
