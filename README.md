@@ -10,7 +10,9 @@ How to use ?
 2- NPM install
 
 3- "npm run start" Start the server
+
    "npm run dev" Lunch the server with nodemon
+   
    "npm run debug" Lunch the server in debug
 
 
