@@ -159,6 +159,8 @@ var alarms = {};
 if(debugMod)
   LogWarning('!!!  DEBUG MODE ON  !!!');
 
+ffmpeg.setFfmpegPath(path.join(__dirname, '../common/bin/ffmpeg.exe'));
+
 //HTTP / WS Section
   app.use('/public', express.static(path.join(__dirname, '../client'), {
     etag: false
