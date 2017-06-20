@@ -2,7 +2,8 @@ var bbq = {};
 
 jQuery(function ($) {
 
-    var socket = io('http://localhost:8080');
+    var socket = io('http://'+location.host);
+    
     // chaque chargement
     socket.emit('getProfile');
     socket.emit('getMonitoring');
