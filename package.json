@@ -5,7 +5,8 @@
   "main": "server/index.js",
   "scripts": {
     "docker": "docker build .",
-    "dev": "nodemon server/index.js",
+    "dev": "nodemon server/index.js debug",
+    "debug": "node server/index.js debug",
     "start": "node server/index.js",
     "service": "node server/install.js",
     "unistall": "node server/unistall.js",

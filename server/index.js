@@ -1,6 +1,12 @@
 'use strict';
 
-const debugMod = true;
+let debugMod = false;
+
+	process.argv.forEach((val, index) => {
+  		if(val == 'debug')
+        debugMod = true;
+	});
+
 
 //LIBS
   const express = require('express');
@@ -750,7 +756,7 @@ class Watchfolder {
 }
 
 
-try{ server.listen(8080); LogWarning('Sever started and listen on port 8080'); } catch(e){ LogError('Starting server '+e.message); }
+try{ server.listen(8080); LogWarning('Sever started and listen on port 8080'); } catch(e){ LogError('Starting server ' + e.message); }
 
 process.on('exit', (code) => {
 		LogInfo('Exit code: '+code);
