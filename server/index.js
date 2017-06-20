@@ -514,7 +514,7 @@ var newWFJob = function (parameters) {
 const parseInfo = function(line, id){
   let globalPSNR = globalPSNRegex.exec(line);
   if(globalPSNR != null){
-    jobs[id].globalPSNR = globalPSNR[0].split(':')[1];
+    jobs[id].globalPSNR = globalPSNR[0];
     LogInfo(`Global PSNR = ${jobs[id].globalPSNR}`);
     return;
   }
@@ -615,15 +615,16 @@ const BBQJob = function (jobID, parameters) {
     self.path = parameters.path;
     self.startTime = new Date();
   
+    var vCodec = 'libx265';
     switch(profile.vCodec){
       case 'x264':
-        var vCodec = 'libx264';
+        vCodec = 'libx264';
       break;
       case 'x265':
-        var vCodec = 'libx265';
+        vCodec = 'libx265';
       break;
       default:
-        var vCodec = 'libx264';
+        vCodec = 'libx264';
       break;
     }
 
